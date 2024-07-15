@@ -1,0 +1,7 @@
+pypdf
+langchain
+langchain-community
+faiss-gpu
+python-dotenv
+langchain-openai
+streamlit-antd-components
