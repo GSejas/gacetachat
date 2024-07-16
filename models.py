@@ -51,15 +51,30 @@ class ExecutionState(enum.Enum):
 class ExecutionSession(Base):
     __tablename__ = "execution_sessions"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    content_template_id = Column(Integer, ForeignKey('content_templates.id'))
-    user_id = Column(Integer, ForeignKey('users.id'))
+    content_template_id = Column(Integer, ForeignKey('content_templates.id'), nullable=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     completed_at = Column(DateTime, nullable=True)
     status = Column(String, default=ExecutionState.INIT.value)
+    document_id = Column(String, ForeignKey('gacetas.id'), nullable=True)
 
     content_template = relationship("ContentTemplate")
     user = relationship("User")
     logs = relationship("ContentExecutionLog", back_populates="execution_session")
+    messages  = relationship("ChatMessage", back_populates="chat_session")
+    gaceta = relationship("GacetaPDF")
+
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    session_id = Column(String, ForeignKey("execution_sessions.id"), nullable=False)
+    role = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+
+    chat_session = relationship("ExecutionSession", back_populates="messages")
+
 
 class ContentExecutionLog(Base):
     __tablename__ = "execution_logs"
@@ -116,6 +131,8 @@ class GacetaPDF(Base):
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, default=datetime.utcnow)
     file_path = Column(String, nullable=False)
+
+    exec_sess = relationship("ExecutionSession", back_populates="gaceta")
 
 from db import engine
 

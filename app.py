@@ -14,6 +14,11 @@ from logging_setup import setup_logging
 from config import config
 from qa import get_llm, query_folder
 
+import traceback
+import random
+import csv
+
+from stream.api import *
 setup_logging()
 
 import streamlit_antd_components as sac
@@ -25,216 +30,216 @@ from db import get_db
 from langchain_openai import OpenAIEmbeddings
 from pytz import timezone
 
-# db_session = next(get_db())
+
+# Initialize session state for itemid if not present
+if 'date' not in st.session_state:
+    # Set the timezone to Costa Rica
+    costa_rica_tz = pytz.timezone('America/Costa_Rica')
+    current_time = datetime.now(costa_rica_tz)
+
+    # Get the date string in the format "YYYY-MM-DD"
+    date_str = current_time.strftime("%Y-%m-%d")
+    st.session_state['date'] = date_str
+    
+    
+# Check if redirected with a code
+redirect_params = st.query_params
+if 'date' in redirect_params:
+    available_days = list_available_index_days()
+    available_days_str = [day.split('T')[0] for day in available_days]
+    date = redirect_params.get('date')
+    if date in available_days_str:
+        st.session_state.date = date
+    else:
+        st.warning("Invalid date selected. Please select a valid date.")
+else:
+    st.session_state.date = st.session_state.get('date', '')
+    
+admin_userid = 1
+
+def ui_start_session(db, userid):
+    my_expander_3 = st.expander(label='Session', expanded=True)
+    with my_expander_3:
+        # Option to start a new chat session
+        if st.button("Start New Chat Session"):
+            new_session = ExecutionSession(user_id=userid, status=ExecutionState.INIT.value)
+            db.add(new_session)
+            db.commit()
+            st.session_state["current_session_id"] = new_session.id
+        
+            # Generate the initial message
+            initial_message = "I'm a helpful ai reporting assistant, tasked with helping out extract information from the daily Gaceta of Costa Rica. How can I help you today?"
+            initial_chat_message = ChatMessage(session_id=new_session.id, role="assistant", content=initial_message)
+            db.add(initial_chat_message)
+            db.commit()
+            st.session_state.messages = [{"role": "assistant", "content": initial_message}]
+
+        # Select an active chat session
+        active_sessions = db.query(ExecutionSession).filter_by(user_id=userid, status=ExecutionState.INIT.value).all()
+        session_id = st.selectbox("Select Chat Session", [sess.id for sess in active_sessions])
+
+        if session_id:
+            st.session_state["current_session_id"] = session_id
+
+        
+        if "current_session_id" in st.session_state:
+            current_session = db.query(ExecutionSession).filter_by(id=st.session_state["current_session_id"]).first()
+        else:
+            current_session = None
+        
+        # Options to reset or archive chat sessions
+        col1, col2 = st.columns(2)
+        if col1.button("Delete Chat Session"):
+            st.session_state.messages = []
+            db.query(ExecutionSession).filter_by(session_id=current_session.id).delete()
+            db.commit()
+
+        if col2.button("Archive Chat Session"):
+            current_session.status = ExecutionState.OUTDATED.value
+            db.commit()
+            st.session_state.pop("current_session_id", None)
+
+
 
 def main():
     st.title("Daily Gaceta of Costa Rica Chatbot")
     
     user_id = 1  # Example user_id, should be dynamic in real use case
     template_id = 1  # Example template_id, should be dynamic in real use case
-    
-    tab1, tab2, tab3, tab4 = st.tabs(["Today's Processed Prompts", "Chat with Today's PDF", "Admin", "Exec Logs"])
+    available_days = list_available_index_days()
+    available_days_str = [day.split('T')[0] for day in available_days]
+    selected_day = st.sidebar.selectbox("Select a Day", available_days_str, index = available_days_str.index(st.session_state.date))
+    st.session_state.date = selected_day
+    tab1, tab2, tab4 = st.tabs(["Today's Processed Prompts", "Chat with Today's PDF", "Admin"])
     with tab1:
-        if st.button("Load Today's Prompts"):
-            if st.button("Process Today's Prompts"):
-                session_id = execute_daily_prompts(user_id, template_id)
-                st.success("Today's prompts have been processed.")
-            # if not check_today_processed():
-            #     if st.button("Process Today's Prompts"):
-            #         session_id = execute_daily_prompts(user_id, template_id)
-            #         st.success("Today's prompts have been processed.")
-            # else:
-            #     session_id = get_today_session_id()
-            #     display_processed_prompts(session_id)
-            # if st.checkbox("Show Successful Sessions"):
-            successful_sessions = get_successful_sessions()
-            for session in successful_sessions:
-                st.header(f"Session ID: {session.id}")
-                st.subheader(f"Completed At: {session.completed_at}")
-                st.subheader(f"status: {session.status}")
-                st.markdown("#### **Prompts**:")
-                display_last_execution_session(session.id)
-
+        # if st.button("Process Today's Prompts"):
+        #     session_id = execute_content_template_prompts(user_id, template_id)
+        #     st.success("Today's prompts have been processed.")
+        
+        # if st.button("Load Today's Prompts"):
+        session = get_execution_session_by_date(selected_day)
+        session_id = session['id']
+        # st.header(f"Session ID: {session_id}")
+        st.header("Today's Processed Prompts")
+        # Application description
+        st.markdown("""
+        ## How It Works
+        This web application processes prompts based on the Daily Gaceta of Costa Rica and allows users to interact with the processed PDF of the day. 
+        - **Today's Processed Prompts**: View and manage the prompts processed for today.
+        - **Chat with Today's PDF**: Enter questions to search through today's PDF and get answers.
+        - **Admin**: View detailed logs of prompt executions.
+        """)
+        # st.subheader(f"Completed At: {session['completed_at']}")
+        # st.subheader(f"status: {session['status']}")
+        get_and_display_execution_session(session_id)
+    
     with tab2:
-        pass
-        # st.subheader("Chat with Today's PDF")
-        # query = st.text_input("Enter your question:")
-        # if st.button("Submit"):
-        #     embeddings = OpenAIEmbeddings()
-        #     index, documents = process_latest_pdf()
-        #     if index and documents:
-        #         answer = search_in_pdf(query, index, documents, embeddings)
-        #         st.write(answer)
+        db = next(get_db()) 
+        
+        with st.sidebar:
 
-    with tab3:
-        pass
-        # st.subheader("Admin: Add Prompt Template")
-        # template_title = st.text_input("Template Title")
-        # template_description = st.text_area("Template Description")
-        # if st.button("Add Template"):
-        #     add_prompt_template(template_title, template_description)
-        #     st.success("Template added successfully.")
-            
+                ui_start_session(db, admin_userid)
+                
+                my_expander_1 = st.expander(label='ChatGPT Settings')  
+                with my_expander_1:
+                    st.session_state["openai_model"] = st.selectbox("Select OpenAI Model", ["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"])
+                    temperature = st.slider("Select Temperature", 0.1, 1.0, 0.5, 0.1)
+                    st.session_state["temperature"] = temperature
+
+
+        if "current_session_id" in st.session_state:
+            current_session = db.query(ExecutionSession).filter_by(id=st.session_state["current_session_id"]).first()
+        else:
+            current_session = None
+
+        if current_session:
+            messages = db.query(ChatMessage).filter_by(session_id=current_session.id).all()
+            st.session_state.messages = [{"role": msg.role, "content": msg.content} for msg in messages]
+        else:
+            st.session_state.messages = []
+
+
+        # Display chat history
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+        # Input new message
+        if prompt := st.chat_input("What is up?"):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+
+            with st.chat_message("assistant"):
+                response = chat_with_document(
+                    date=selected_day, 
+                    query=prompt,
+                    temperature=st.session_state.get("temperature", 0.5),
+                    model=st.session_state.get("openai_model", "gpt-3.5-turbo"),
+                    history=[
+                        {"role": m["role"], "content": m["content"]}
+                        for m in st.session_state.messages
+                    ])
+                st.markdown(response['answer'])
+
+            st.session_state.messages.append({"role": "assistant", "content": response['answer']})
+
+            # Save messages to the database
+            user_message = ChatMessage(session_id=current_session.id, role="user", content=prompt)
+            assistant_message = ChatMessage(session_id=current_session.id, role="assistant", content=response['answer'])
+            db.add(user_message)
+            db.add(assistant_message)
+            db.commit()
+            st.rerun()
+        
     with tab4:
         st.sidebar.subheader("Admin: Prompt Execution Logs")
-        # limit = st.sidebar.number_input("Limit", min_value=1, max_value=10, value=3, step=1, key="limit")
-        if st.button("Load Recent Execution Logs"):
-            limit = st.sidebar.number_input("Limit", min_value=1, max_value=10, value=3, step=1, key="limit")
-            display_recent_exec_logs(limit)
-        # display_recent_exec_logs(limit)
+        limit = st.sidebar.number_input("Limit", min_value=1, max_value=10, value=3, step=1, key="limit")
+        # if st.button("Load Recent Execution Logs"):
+        display_recent_exec_logs(limit)
         
-@st.cache_data(show_spinner=False)
-def get_successful_sessions():
-    db_session = next(get_db()) 
-    sessions = db_session.query(ExecutionSession).filter(
-        ExecutionSession.status == ExecutionState.EXECUTED.value,
-            ).order_by(ExecutionSession.created_at.desc()).limit(3).all()
-    return sessions
-
-@st.cache_data(show_spinner=False)
-def check_today_processed():
-    db_session = next(get_db()) 
-    today = datetime.now(timezone('America/Costa_Rica')).date()
-    session = db_session.query(ExecutionSession).filter(
-        ExecutionSession.created_at >= today,
-        ExecutionSession.created_at < today + timedelta(days=1)
-    ).first()
-    return session is not None
-
-@st.cache_data(show_spinner=False)
-def get_today_session_id():
-    db_session = next(get_db()) 
-    today = datetime.now(timezone('America/Costa_Rica')).date()
-    session = db_session.query(ExecutionSession).filter(
-        ExecutionSession.created_at >= today,
-        ExecutionSession.created_at < today + timedelta(days=1)
-    ).first()
-    return session.id if session else None
-
-def add_prompt_template(title, description):
-    db_session = next(get_db()) 
-    new_template = ContentTemplate(title=title, description=description)
-    db_session.add(new_template)
-    db_session.commit()
-
-
-# @st.cache_data
-# def get_session_exec_logs(session_id):
-#     db_session = next(get_db()) 
-#     return db_session.query(ContentExecutionLog).filter_by(execution_session_id=session_id).all()
-@st.cache_data(show_spinner=False)
 def display_recent_exec_logs(limit=3):
-    db_session = next(get_db())  # Initialize database session
-    
     # Query the most recent content execution logs
-    recent_logs = db_session.query(ContentExecutionLog).order_by(ContentExecutionLog.created_at.desc()).limit(limit).all()
+    recent_logs = fetch_recent_exec_logs(limit=limit)
     
     for log in recent_logs:
         st.divider()
         
-        st.write(f"Prompt: {log.prompt.prompt_text}")
+        st.write(f"Prompt: {log['prompt_text']}")
         # Add expander that holds the raw prompt
-        st.json(log.to_json())
+        st.json(log, expanded=False)
             
-        if log.output:
-            st.write(f"id: {log.id}")
-            st.write(f"state: {log.state}")
-            st.write(f"Response: {log.output.response}")
-            st.write(f"Sources: {log.output.sources}")
+        if log['query_response_id']:
+            st.write(f"id: {log['id']}")
+            st.write(f"state: {log['state']}")
+            st.markdown(f"### Response: \n\n{log['response']}")
+            with st.expander("sources"):
+                st.write(f"Sources: {log['sources']}")
             
-            with st.expander("Raw Prompt"):
-                st.write(log.output.raw_prompt)
+            # with st.expander("Raw Prompt"):
+            #     st.write(log['raw_prompt'])
         else:
             st.write("Response: N/A")
             st.write("Sources: N/A")
 
         # Assuming re-run functionality is similar to the existing one
-        if st.button(f"Re-run Prompt {log.prompt.id}", key=f"rere_run_{log.id}_{log.id}_{log.execution_session_id}_{log.prompt.id}"):
-            re_run_prompt(log.prompt.id, log.execution_session_id)
+        if st.button(f"Re-run Prompt", key=f"rere_run_{log['id']}_{log['execution_session_id']}"):
+            re_run_prompt(log['promp_id'], log['execution_session_id'])
 
-from sqlalchemy.orm import Session
-# from .models import ContentExecutionLog, ExecutionState
-def get_last_executed_log(db_session, prompt_id):
-    db_session = next(get_db()) 
-    return db_session.query(ContentExecutionLog)\
-        .filter(ContentExecutionLog.state == ExecutionState.EXECUTED.value, ContentExecutionLog.prompt_id == prompt_id, ContentExecutionLog.query_response_id != None)\
-        .order_by(ContentExecutionLog.created_at.desc())\
-        .first()
 
-def display_last_execution_session(session_id):
-    db_session = next(get_db()) 
-    import random
-    
-    exec_session = db_session.query(ExecutionSession).filter_by(id=session_id).first() #.limit(3).all() 
-    content_template = exec_session.content_template
-    # indx = sac.tabs([
-    #     sac.TabsItem(label=f"{idx}", tag="10") for idx, log in enumerate(logs)
-    # ], align='center', key=f"{session_id}", return_index=True)
 
-    for prompts in content_template.prompts:
-        log = get_last_executed_log(db_session, prompts.id)
-        # for log in logs:
-            
-        st.divider()
-        
-        st.write(f"Prompt: {log.prompt.prompt_text[:35]}...")
-        # add expander that holds the raw prompt
-            
-        if log.output:
-            st.write(f"Response: {log.output.response}")
-            with st.expander("sources"):
-                st.write(f"sources: {log.output.sources}")
-            
-            with st.expander("Raw Prompt"):
-                st.write(log.output.raw_prompt)
-        else:
-            st.write("Response: N/A")
-            st.write("sources: N/A")
 
-            if st.button(f"Re-run Prompt {log.prompt.id}", key=f"re_run_{log.id}_{log.execution_session_id}_{log.prompt.id}_{random.randint(1, 100)}"):
-                re_run_prompt(log.prompt.id, log.execution_session_id)
-                st.success(f"Prompt {log.prompt.id} re-executed successfully.")
 
-        st.divider()
-
-def process_latest_pdf():
-    # Implement your logic to process the latest PDF and return the index and documents
-    pass
-
-def search_in_pdf(query, index, documents, embeddings):
-    # Implement your logic to search in the PDF
-    pass
-
-def execute_daily_prompts(user_id, template_id):
-    db_session = next(get_db()) 
-    session_id = create_execution_session(user_id, template_id)
-    prompts = db_session.query(Prompt).filter_by(template_id=template_id).all()
-    for prompt in prompts:
-        try:
-            response_text = run_prompt_by_date(prompt.prompt_text)  # Function to execute the prompt
-            log = log_prompt_execution(session_id, prompt.id, ExecutionState.EXECUTED.value)
-            query = PromptQueryResponse(
-                raw_prompt=response_text['partial'].format(), 
-                response=response_text['answer'], 
-                prompt_template_id=prompt.id,   
-                sources=str(response_text['sources'])
-            )
-            
-            db_session.add(query)
-            db_session.commit()
-            
-            log.query_response_id = query.id
-            log.execution_session_id = session_id
-            log.template_id = template_id
-            db_session.commit()
-    
-        except Exception as e:
-            log = log_prompt_execution(session_id, prompt.id, ExecutionState.FAILED.value, error_message=str(e))
-    session = db_session.query(ExecutionSession).filter_by(id=session_id).first()
-    session.status = ExecutionState.EXECUTED.value
-    session.completed_at = datetime.now(timezone('America/Costa_Rica'))
-    db_session.commit()
-    return session_id
+def get_and_display_execution_session(session_id):
+    try:
+        logs = get_last_execution_session(session_id)
+        for log in logs:
+            st.divider()
+            st.markdown(f" ### {log['name']}")
+            st.markdown(f" #### {log['short_description']}")
+            st.markdown(f"{log['response']}")
+    except Exception as e:
+        st.error(str(e))
 
 
 def re_run_prompt(prompt_id, session_id):
@@ -266,7 +271,7 @@ def run_prompt_by_date(query, date=datetime.strptime(datetime.now(pytz.timezone(
     db_session = next(get_db()) 
     
     existing_gaceta = db_session.query(GacetaPDF).filter_by(date=date).first()
-    if existing_gaceta:
+    if True:
         faiss_helper = FAISSHelper()
         latest_gaceta_dir = os.path.join(config.GACETA_PDFS_DIR, datetime.now(timezone('America/Costa_Rica')).strftime("%Y-%m-%d"))
         
@@ -284,32 +289,23 @@ def run_prompt_by_date(query, date=datetime.strptime(datetime.now(pytz.timezone(
             return result
     return None
 
-def create_execution_session(user_id, template_id):
-    db_session = next(get_db()) 
-    new_session = ExecutionSession(
-        content_template_id=template_id,
-        user_id=user_id,
-        status=ExecutionState.INIT.value,
-        created_at=datetime.now(timezone('America/Costa_Rica'))
-    )
-    db_session.add(new_session)
-    db_session.commit()
-    return new_session.id
-   
-def log_prompt_execution(session_id, prompt_id, state, error_message=None, **kwargs) -> ContentExecutionLog:
-    db_session = next(get_db()) 
-    log_entry = ContentExecutionLog(
-        execution_session_id=session_id,
-        prompt_id=prompt_id,
-        state=state,
-            error_message=error_message,
-            **kwargs
-    )
-    db_session.add(log_entry)
-    db_session.commit()
-    return log_entry
+def chat_with_document(date, query, temperature, model, history, stream=False):
+    faiss_helper = FAISSHelper()
+    latest_gaceta_dir = os.path.join(config.GACETA_PDFS_DIR, date)
     
-    
+    # Placeholder function for running the prompt. Replace with actual logic.
+    if os.path.exists(os.path.join(latest_gaceta_dir, "index.faiss")):
+        db = faiss_helper.load_faiss_index(latest_gaceta_dir)
+            
+        llm = get_llm(model=model, openai_api_key=config.OPENAI_API_KEY, temperature=temperature)
+        result = query_folder(
+            folder_index=db,
+            query=query,
+            llm=llm,
+        )
+        
+        return result
+    return None
 
 if __name__ == "__main__":
     main()

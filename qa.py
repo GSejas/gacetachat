@@ -60,7 +60,7 @@ from langchain.docstore.document import Document
 from pydantic import BaseModel
 from langchain.chat_models.base import BaseChatModel
 # <!-- ruff: noqa: F821 -->
-from langchain.globals import set_llm_cache
+# from langchain.globals import set_llm_cache
 
 
 class AnswerWithSources(BaseModel):
@@ -69,9 +69,9 @@ class AnswerWithSources(BaseModel):
 
 from langchain.chains.combine_documents import create_stuff_documents_chain
 
-from langchain.cache import InMemoryCache
+# from langchain.cache import InMemoryCache
 
-set_llm_cache(InMemoryCache())
+# set_llm_cache(InMemoryCache())
 
 def query_folder(
         query: str,

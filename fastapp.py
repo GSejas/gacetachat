@@ -11,7 +11,10 @@ import streamlit as st
 from models import *
 from process_pdf import process_latest_pdf, search_in_pdf
 # from langchain_openai import OpenAIEmbeddings
-# app.py
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from db import get_db
+from typing import List
 import streamlit as st
 import os
 from models import Prompt
@@ -35,9 +38,35 @@ from pytz import timezone
 
 app = FastAPI()
 
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from crud import *
+from datetime import datetime
+from typing import List
+
+
+@app.get("/execution_session_by_date/")
+async def get_execution_session(date: str, db: Session = Depends(get_db)):
+    try:
+        date_obj = datetime.strptime(date, '%Y-%m-%d')
+        session = get_execution_session_by_date(db, date_obj)
+        if session:
+            return session
+        else:
+            raise HTTPException(status_code=404, detail="Execution session not found for the given date")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format, should be YYYY-MM-DD")
+
+@app.get("/execution_session/available/")
+async def list_available_index_days_api(db: Session = Depends(get_db)):
+    days = list_available_index_days(db)
+    return [day[0] for day in days]
+
+
 @app.post("/execute_daily_prompts/")
 async def execute_daily_prompts(user_id: int, template_id: int, db: Session = Depends(get_db)):
-    session_id = create_execution_session(user_id, template_id, db)
+    session_id = create_execution_session(db, user_id, template_id)
     prompts = db.query(Prompt).filter_by(template_id=template_id).all()
     for prompt in prompts:
         try:
@@ -66,54 +95,106 @@ async def execute_daily_prompts(user_id: int, template_id: int, db: Session = De
     db.commit()
     return {"session_id": session_id}
 
-@app.get("/successful_sessions/")
-async def get_successful_sessions(db: Session = Depends(get_db)):
-    sessions = db.query(ExecutionSession).filter(
-        ExecutionSession.status == ExecutionState.EXECUTED.value,
-    ).order_by(ExecutionSession.created_at.desc()).all()
-    return sessions
 
-@app.get("/recent_exec_logs/")
-async def get_recent_exec_logs(limit: int = 3, db: Session = Depends(get_db)):
-    recent_logs = db.query(ContentExecutionLog).order_by(ContentExecutionLog.created_at.desc()).limit(limit).all()
-    return recent_logs
 
-def create_execution_session(user_id: int, template_id: int, db: Session) -> int:
-    new_session = ExecutionSession(
-        content_template_id=template_id,
-        user_id=user_id,
-        status=ExecutionState.INIT.value,
-        created_at=datetime.now(timezone('America/Costa_Rica'))
+@app.get("/execution_session/", response_model=List[dict])
+async def execution_session_api(session_id: str, db: Session = Depends(get_db)):
+    logs = display_last_execution_session(db, session_id)
+    return logs
+
+
+from sqlalchemy.orm import Session
+from sqlalchemy import desc, asc
+# from . import models, schemas
+from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional, List
+
+class LogQueryParams(BaseModel):
+    limit: Optional[int] = 10
+    offset: Optional[int] = 0
+    order: Optional[str] = "desc"
+    prompt_text: Optional[str] = None
+    state: Optional[str] = None
+
+class LogResponseSchema(BaseModel):
+    id: str
+    execution_session_id: str
+    prompt_id: int
+    state: str
+    created_at: datetime
+    error_message: Optional[str] = None
+    query_response_id: Optional[str] = None
+    template_id: Optional[int] = None
+    prompt_text: str
+    response: Optional[str] = None
+    sources: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+import models
+
+def get_content_logs(db: Session, params: LogQueryParams):
+    query = db.query(models.ContentExecutionLog).join(models.Prompt).add_entity(models.Prompt)
+
+    if params.prompt_text:
+        query = query.filter(models.Prompt.prompt_text.contains(params.prompt_text))
+
+    if params.state:
+        query = query.filter(models.ContentExecutionLog.state == params.state)
+
+    if params.order == "asc":
+        query = query.order_by(asc(models.ContentExecutionLog.created_at))
+    else:
+        query = query.order_by(desc(models.ContentExecutionLog.created_at))
+
+    query = query.offset(params.offset).limit(params.limit)
+    
+    logs = query.all()
+
+    # Transform the result to match the response schema
+    log_responses = []
+    for log, prompt in logs:
+        log_response = LogResponseSchema(
+            id=log.id,
+            execution_session_id=log.execution_session_id,
+            prompt_id=log.prompt_id,
+            state=log.state,
+            created_at=log.created_at,
+            error_message=log.error_message,
+            query_response_id=log.query_response_id,
+            template_id=log.template_id,
+            prompt_text=prompt.prompt_text,
+            response=log.output.response if log.query_response_id  else None,
+            sources=log.output.sources if log.query_response_id  else None
+        )
+        log_responses.append(log_response)
+    
+    return log_responses
+
+
+
+@app.get("/content_logs/", response_model=List[LogResponseSchema])
+async def get_content_logs_api(
+    limit: int = 10,
+    offset: int = 0,
+    order: str = "desc",
+    prompt_text: Optional[str] = None,
+    state: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    params = LogQueryParams(
+        limit=limit,
+        offset=offset,
+        order=order,
+        prompt_text=prompt_text,
+        state=state
     )
-    db.add(new_session)
-    db.commit()
-    return new_session.id
+    return get_content_logs(db, params)
 
-def log_prompt_execution(session_id: int, prompt_id: int, state: str, db: Session, error_message: str = None, **kwargs) -> ContentExecutionLog:
-    log_entry = ContentExecutionLog(
-        execution_session_id=session_id,
-        prompt_id=prompt_id,
-        state=state,
-        error_message=error_message,
-        **kwargs
-    )
-    db.add(log_entry)
-    db.commit()
-    return log_entry
 
-def run_prompt_by_date(query: str, db: Session, date: datetime = datetime.now(timezone('America/Costa_Rica')).date()):
-    existing_gaceta = db.query(GacetaPDF).filter_by(date=date).first()
-    if existing_gaceta:
-        faiss_helper = FAISSHelper()
-        latest_gaceta_dir = os.path.join(config.GACETA_PDFS_DIR, date.strftime("%Y-%m-%d"))
-        
-        if os.path.exists(os.path.join(latest_gaceta_dir, "index.faiss")):
-            db = faiss_helper.load_faiss_index(latest_gaceta_dir)
-            llm = get_llm(model=config.OPENAI_MODEL_NAME, openai_api_key=config.OPENAI_API_KEY, temperature=config.OPENAI_TEMPERATURE)
-            result = query_folder(folder_index=db, query=query, llm=llm)
-            return result
-    return None
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="localhost", port=8005)
+    uvicorn.run(app, host="0.0.0.0", port=8007)

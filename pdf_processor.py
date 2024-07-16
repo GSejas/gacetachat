@@ -13,7 +13,18 @@ class PDFProcessor:
         session = Session()
         latest_gaceta = session.query(GacetaPDF).order_by(GacetaPDF.date.desc()).first()
         if latest_gaceta:
-            loader = PyPDFLoader(latest_gaceta.file_path)
+            
+            import os
+
+            file_path = latest_gaceta.file_path
+            absolute_path = os.path.abspath(file_path)
+
+            if os.path.exists(absolute_path):
+                print(f"File exists at: {absolute_path}")
+            else:
+                print(f"File does not exist at: {absolute_path}")
+            
+            loader = PyPDFLoader(absolute_path)
             documents = loader.load()
             db = self.faiss_helper.create_faiss_index(documents)
             directory = os.path.dirname(latest_gaceta.file_path)

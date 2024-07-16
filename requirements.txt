@@ -1,7 +1,8 @@
 pypdf
 langchain
 langchain-community
-faiss-gpu
+faiss-cpu
 python-dotenv
 langchain-openai
 streamlit-antd-components
+beautifulsoup4

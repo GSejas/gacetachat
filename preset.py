@@ -29,39 +29,6 @@ La Asamblea Legislativa otorga el Benemérito de las Letras Patrias a Fabián Do
 La Notaría del Estado confeccionará la escritura de traspaso del bien inmueble, para que su obra literaria siga viva 📝📃"""
 
 
-# def create_preset_data(db: Session):
-#     # Check if the preset content template already exists
-#     existing_template = db.query(ContentTemplate).filter_by(id=1).first()
-#     if existing_template:
-#         return
-
-#     # Create a new content template
-#     content_template = ContentTemplate(
-#         id=1,
-#         title="Daily Preset Prompts",
-#         description="Preset prompts to be executed on a daily basis."
-#     )
-#     db.add(content_template)
-#     db.commit()
-#     db.refresh(content_template)
-
-#     # Create associated prompts
-#     prompts = [
-#         twitter_prompt,
-#         "What are the top news headlines in today's Gaceta?",
-#         "Summarize the economic updates in today's Gaceta.",
-#         "What legal changes are mentioned in today's Gaceta?",
-#         "Highlight the cultural events listed in today's Gaceta.",
-#         "What environmental news is covered in today's Gaceta?"
-#     ]
-#     for text in prompts:
-#         prompt = Prompt(
-#             template_id=content_template.id,
-#             prompt_text=text
-#         )
-#         db.add(prompt)
-#     db.commit()
-
 
 
 def create_preset_data(db: Session):
@@ -118,7 +85,7 @@ def create_preset_data(db: Session):
             template_id=content_template.id,
             prompt_text=prompt_data["text"],
             name=prompt_data["name"],
-            description=prompt_data["description"]
+            short_description=prompt_data["description"]
         )
         db.add(prompt)
     db.commit()
