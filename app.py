@@ -107,7 +107,7 @@ def main():
     selected_day = st.sidebar.selectbox("Select a Day", available_days_str, index = available_days_str.index(st.session_state.date))
     st.session_state.date = selected_day
     st.sidebar.write(selected_day)
-    tab1, tab2, tab4 = st.tabs(["Today's Processed Prompts", "Chat with Today's PDF", "Admin"])
+    tab1, tab2, tab4, tab5, tab6 = st.tabs(["Today's Processed Prompts", "Chat with Today's PDF", "Admin", "Tweet Integration", "Tweet Manager"])
     with tab1:
         # if st.button("Process Today's Prompts"):
         #     session_id = execute_content_template_prompts(user_id, template_id)
@@ -201,6 +201,11 @@ def main():
         limit = st.sidebar.number_input("Limit", min_value=1, max_value=10, value=3, step=1, key="limit")
         # if st.button("Load Recent Execution Logs"):
         display_recent_exec_logs(limit)
+        
+    with tab5:
+        authenticate()
+    with tab6:
+        post_tweet_form()
         
 def display_recent_exec_logs(limit=3):
     # Query the most recent content execution logs

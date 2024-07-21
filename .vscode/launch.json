@@ -17,11 +17,37 @@
             ]
         },
         {
+            "name": "Multi Page Streamlit",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "streamlit",
+            "args": [
+                "run",
+                "${workspaceFolder}/streamlit_app.py",
+                "--server.port",
+                "8513"
+            ]
+        },
+        {
             "name": "Pyt Current File",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "FastAPI: App",
+            "type": "python",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "fastapp:app",
+                "--reload",
+                "--port",
+                "8050"
+            ],
+            "jinja": true,
+            "justMyCode": false,
         }
     ]
 }

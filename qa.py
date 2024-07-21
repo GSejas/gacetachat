@@ -108,4 +108,5 @@ def query_folder(
             "answer":answer,
             "partial":partial_prompt,
             "sources":sources,
+            "ai_references":result.split("SOURCES:")[1],
             }

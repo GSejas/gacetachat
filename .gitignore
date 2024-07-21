@@ -19,3 +19,4 @@ gaceta_pdfs
 gaceta1.db
 .gitignore
 gaceta1.db
+.env

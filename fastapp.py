@@ -1,3 +1,4 @@
+# from services.counter import check_global_limit, increment_global_query_count
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
@@ -13,7 +14,8 @@ from typing import List
 from models import Prompt
 from logging_setup import setup_logging
 from config import config
-from services.counter import check_global_limit, increment_global_query_count
+from services.counter import increment_global_query_count, check_global_limit
+import tweepy
 
 setup_logging()
 
@@ -25,9 +27,25 @@ from models import *
 from db import get_db
 from langchain_openai import OpenAIEmbeddings
 from pytz import timezone
+from dotenv import load_dotenv
+import os
 
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# Replace these with your personal account's credentials
+twitter_api_key = os.getenv("TWITTER_API_KEY")
+twitter_api_secret_key = os.getenv("TWITTER_API_secret_key")
+
+
+twitter_consumer_api_key = os.environ.get("TWITTER_CONSUMER_API_KEY")
+twitter_consumer_api_secret_key = os.environ.get("TWITTER_CONSUMER_API_secret_key")
+
+callback_url = 'https://c470-186-176-232-195.ngrok-free.app/twitter/callback'
+
+from dotenv import load_dotenv
+API_KEY = os.environ.get("APP_SECRET_API_KEY")
 
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -35,6 +53,27 @@ from sqlalchemy.orm import Session
 from crud import *
 from datetime import datetime
 from typing import List
+from fastapi import FastAPI, HTTPException, Request, Depends
+from fastapi.responses import JSONResponse
+
+# CORS settings for local development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# @app.middleware("http")
+# async def api_key_middleware(request: Request, call_next):
+#     api_key = request.headers.get("X-API-KEY")
+#     if api_key != API_KEY:
+#         raise HTTPException(status_code=401, detail="Invalid API Key")
+#     response = await call_next(request)
+#     return response
+
 
 
 @app.get("/execution_session_by_date/")
@@ -53,7 +92,6 @@ async def get_execution_session(date: str, db: Session = Depends(get_db)):
 async def list_available_index_days_api(db: Session = Depends(get_db)):
     days = list_available_index_days(db)
     return [day[0] for day in days]
-
 
 @app.post("/execute_daily_prompts/")
 async def execute_daily_prompts(user_id: int, template_id: int, db: Session = Depends(get_db)):
@@ -199,6 +237,160 @@ async def increment_global_query_count_api(db: Session = Depends(get_db)):
         return {"success": True}
     else:
         raise HTTPException(status_code=429, detail="Global query limit reached")
+
+from fastapi.responses import RedirectResponse
+
+twitter_scope = ["tweet.read", "tweet.write", "users.read", "offline.access"]
+
+# In-memory storage for code verifiers
+code_verifiers = {}
+
+from oauth_helpers import generate_code_challenge, generate_code_verifier
+
+from redis import Redis
+
+redis_client = Redis(
+    host="165.227.177.167", port=6379, db=0, password='foofoojaaa', decode_responses=True
+)
+
+
+def get_refreshed_access_token():
+    refresh_token = redis_client.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(status_code=400, detail="Refresh token not found or expired")
+    
+    auth = tweepy.OAuth2UserHandler(
+        client_id=twitter_api_key,
+        redirect_uri=callback_url,
+        scope=twitter_scope,
+        client_secret=twitter_api_secret_key,
+        # code_challenge=code_challenge,
+        # code_challenge_method='S256'
+    )
+    try:
+        access_token = auth.refresh_token(
+            token_url="https://api.twitter.com/2/oauth2/token",
+            refresh_token=refresh_token
+        )
+        redis_client.set("access_token", access_token, ex=3600)  # Expire after 1 hour
+        return access_token
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error! Failed to refresh access token: {e}")
+
+
+
+@app.get("/twitter/login")
+async def login():
+    code_verifier = generate_code_verifier()
+    code_challenge = generate_code_challenge(code_verifier)
+    auth = tweepy.OAuth2UserHandler(
+        client_id=twitter_api_key,
+        redirect_uri=callback_url,
+        scope=twitter_scope,
+        client_secret=twitter_api_secret_key,
+        # code_challenge=code_challenge,
+        # code_challenge_method='S256'
+    )
+    
+    try:
+        redirect_url = auth.get_authorization_url()
+        code_verifiers[auth._state ] = auth
+        print(f"state: {auth._state}")
+        return RedirectResponse(f"{redirect_url}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error! Failed to get authorization URL: {e}")
+
+@app.get("/twitter/callback")
+async def callback(state: str, code: str, code_verifier: str=""):
+    code_verifier = code_verifiers.pop(state, None)
+    # if not code_verifier:
+    #     raise HTTPException(status_code=400, detail="Invalid state parameter")
+
+    # auth = tweepy.OAuth2UserHandler(
+    #     client_id=twitter_api_key,
+    #     redirect_uri=callback_url,
+    #     scope=twitter_scope,
+    #     client_secret=twitter_api_secret_key,
+    #     # state=state
+    # )
+    try:
+        access_token = code_verifier.fetch_token(
+            f"{callback_url}?state={state}&code={code}",
+        )
+        # refresh_token = access_token['refresh_token']
+        # Store access token and refresh token in Redis
+        redis_client.set("access_token", access_token['access_token'], ex=3600)  # Expire after 1 hour
+        redis_client.set("refresh_token", access_token['refresh_token'])  # No expiry for refresh token
+        return {"access_token": access_token}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error! Failed to fetch access token: {e}")
+
+
+def post_tweet(tweet_text: str):
+    """
+    The function `post_tweet` posts a tweet using Tweepy library after obtaining or refreshing the
+    access token.
+    
+    :param tweet_text: The `post_tweet` function takes a `tweet_text` parameter, which is a string
+    representing the text of the tweet that you want to post on Twitter. This function first retrieves
+    an access token from a Redis client. If the access token is not available, it calls the
+    `get_refreshed_access
+    :type tweet_text: str
+    """
+    access_token = redis_client.get("access_token")
+    if not access_token:
+        access_token = get_refreshed_access_token()
+    client = tweepy.Client(bearer_token=access_token)
+    try:
+        client.create_tweet(text=tweet_text, user_auth=False)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error posting tweet: {e}")
+
+
+@app.post("/twitter/tweet")
+async def post_tweet_api(tweet_text: str):
+    access_token = redis_client.get("access_token")
+    if not access_token:
+        access_token = get_refreshed_access_token()
+    client = tweepy.Client(bearer_token=access_token)
+    try:
+        client.create_tweet(text=tweet_text, user_auth=False)
+        return {"status": "success", "message": "Tweet posted successfully!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error posting tweet: {e}")
+
+
+
+@app.get("/gacetas")
+async def get_gacetas(db: Session = Depends(get_db)):
+    gacetas = db.query(GacetaPDF).all()
+    res = {"gacetas":[(gaceta.to_json(), get_twitter_prompts(db, gaceta.id, 1)) for gaceta in gacetas]}
+    db.close()
+    return res
+
+from pydantic import BaseModel
+
+class ApproveTweetRequest(BaseModel):
+    gaceta_id: int
+    tweet_text: str
+    content_exec_id: str
+
+@app.post("/approve_tweet")
+async def approve_tweet(request: ApproveTweetRequest):
+    # Logic to approve and post tweet
+    access_token = redis_client.get("access_token")
+    if not access_token:
+        access_token = get_refreshed_access_token()
+
+    client = tweepy.Client(access_token)
+    try:
+        tweet_text = request.tweet_text[:200]  # Limit tweet size to 280 characters
+        client.create_tweet(text=tweet_text, user_auth=False)
+        return JSONResponse(content={"message": "Tweet posted successfully"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error posting tweet: {e}")
+
+
 
 if __name__ == "__main__":
     import uvicorn

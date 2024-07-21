@@ -22,6 +22,39 @@ def get_last_executed_log(db: Session, prompt_id: int):
     except NoResultFound:
         return None
 
+
+def get_twitter_prompts(db: Session, gaceta_id: int, twitter_prompt_id):
+    try:
+        gaceta = db.query(GacetaPDF).filter_by(id=gaceta_id).one()
+        exec_session = gaceta.exec_sess
+        exec = []
+        if exec_session:
+            for session in exec_session:
+                logs = []
+                content_exec_logs = session.logs
+                for exec_log in content_exec_logs:
+                    if exec_log.prompt_id == twitter_prompt_id:
+                        logs.append({
+                            "id": exec_log.id,
+                            "name": exec_log.prompt.name,
+                            "state": exec_log.state,
+                            "short_description": exec_log.prompt.short_description,
+                            "prompt_text": exec_log.prompt.prompt_text,
+                            "response": exec_log.output.response if exec_log.query_response_id else None,
+                            "sources": exec_log.output.sources if exec_log.query_response_id else None,
+                            "raw_prompt": exec_log.output.raw_prompt if exec_log.query_response_id else None,
+                            "prompt_id": exec_log.prompt.id,
+                            "execution_session_id": exec_log.execution_session_id
+                        })
+                exec.append({
+                'exec_session': session.to_json() if session else None,
+                'logs': logs
+            })
+        return exec
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="Execution session not found")
+
+
 def display_last_execution_session(db: Session, session_id: str):
     try:
         exec_session = db.query(ExecutionSession).filter_by(id=session_id).one()

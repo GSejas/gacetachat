@@ -28,7 +28,6 @@ class ContentTemplate(Base):
 
     # Relationship with PromptTemplate
     prompts = relationship("Prompt", back_populates="content_template")
-
 class Prompt(Base):
     __tablename__ = "prompts"
     id = Column(Integer, primary_key=True)
@@ -39,10 +38,19 @@ class Prompt(Base):
 
     content_template = relationship("ContentTemplate", back_populates="prompts")
     
+    def to_json(self):
+        return {
+            "id": self.id,
+            "template_id": self.template_id,
+            "prompt_text": self.prompt_text,
+            "name": self.name,
+            "short_description": self.short_description
+        }
     
 class ExecutionState(enum.Enum):
     INIT = "INIT"
     EXECUTED = "EXECUTED"
+    APPROVED = "APPROVED"
     FAILED = "FAILED"
     OUTDATED = "OUTDATED"
 
@@ -62,6 +70,19 @@ class ExecutionSession(Base):
     logs = relationship("ContentExecutionLog", back_populates="execution_session")
     messages  = relationship("ChatMessage", back_populates="chat_session")
     gaceta = relationship("GacetaPDF", back_populates="exec_sess")
+    is_approved = Column(Boolean, default=False)
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "content_template_id": self.content_template_id,
+            "user_id": self.user_id,
+            "created_at": self.created_at,
+            "completed_at": self.completed_at,
+            "status": self.status,
+            "document_id": self.document_id,
+            "is_approved": self.is_approved
+        }
 
 
 
@@ -123,6 +144,16 @@ class PromptQueryResponse(Base):
 
     execution_logs = relationship("ContentExecutionLog", back_populates="output")
 
+    def to_json(self):
+        return {
+            "id": self.id,
+            "raw_prompt": self.raw_prompt,
+            "response": self.response,
+            "sources": self.sources,
+            "prompt_template_id": self.prompt_template_id,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at
+        }
 
 
 class GacetaPDF(Base):
@@ -132,6 +163,13 @@ class GacetaPDF(Base):
     file_path = Column(String, nullable=False)
 
     exec_sess = relationship("ExecutionSession", back_populates="gaceta")
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "date": self.date,
+            "file_path": self.file_path,
+        }
 
 from sqlalchemy import Column, Integer, Date, create_engine
 
