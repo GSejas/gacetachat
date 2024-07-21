@@ -2,10 +2,6 @@
 import pytz
 import streamlit as st
 from models import *
-from process_pdf import process_latest_pdf, search_in_pdf
-# from langchain_openai import OpenAIEmbeddings
-# app.py
-import streamlit as st
 import os
 from models import Prompt
 from pdf_processor import PDFProcessor
@@ -14,9 +10,6 @@ from logging_setup import setup_logging
 from config import config
 from qa import get_llm, query_folder
 
-import traceback
-import random
-import csv
 
 from stream.api import *
 setup_logging()
@@ -27,9 +20,12 @@ import streamlit as st
 from datetime import datetime, timedelta
 from models import *
 from db import get_db
-from langchain_openai import OpenAIEmbeddings
 from pytz import timezone
 
+
+# Initialize session state for query count if not present
+if 'query_count' not in st.session_state:
+    st.session_state['query_count'] = 0
 
 # Initialize session state for itemid if not present
 if 'date' not in st.session_state:
@@ -110,6 +106,7 @@ def main():
     available_days_str = [day.split('T')[0] for day in available_days]
     selected_day = st.sidebar.selectbox("Select a Day", available_days_str, index = available_days_str.index(st.session_state.date))
     st.session_state.date = selected_day
+    st.sidebar.write(selected_day)
     tab1, tab2, tab4 = st.tabs(["Today's Processed Prompts", "Chat with Today's PDF", "Admin"])
     with tab1:
         # if st.button("Process Today's Prompts"):
@@ -164,33 +161,40 @@ def main():
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-        # Input new message
-        if prompt := st.chat_input("What is up?"):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
+        if st.session_state['query_count'] < 3:
+            if check_global_limit():
+                
+                # Input new message
+                if prompt := st.chat_input("What is up?"):
+                    st.session_state.messages.append({"role": "user", "content": prompt})
+                    with st.chat_message("user"):
+                        st.markdown(prompt)
 
-            with st.chat_message("assistant"):
-                response = chat_with_document(
-                    date=selected_day, 
-                    query=prompt,
-                    temperature=st.session_state.get("temperature", 0.5),
-                    model=st.session_state.get("openai_model", "gpt-3.5-turbo"),
-                    history=[
-                        {"role": m["role"], "content": m["content"]}
-                        for m in st.session_state.messages
-                    ])
-                st.markdown(response['answer'])
+                    with st.chat_message("assistant"):
+                        response = chat_with_document(
+                            date=selected_day, 
+                            query=prompt,
+                            temperature=st.session_state.get("temperature", 0.5),
+                            model=st.session_state.get("openai_model", "gpt-3.5-turbo"),
+                            history=[
+                                {"role": m["role"], "content": m["content"]}
+                                for m in st.session_state.messages
+                            ])
+                        st.markdown(response['answer'])
 
-            st.session_state.messages.append({"role": "assistant", "content": response['answer']})
+                    st.session_state.messages.append({"role": "assistant", "content": response['answer']})
 
-            # Save messages to the database
-            user_message = ChatMessage(session_id=current_session.id, role="user", content=prompt)
-            assistant_message = ChatMessage(session_id=current_session.id, role="assistant", content=response['answer'])
-            db.add(user_message)
-            db.add(assistant_message)
-            db.commit()
-            st.rerun()
+                    # Save messages to the database
+                    user_message = ChatMessage(session_id=current_session.id, role="user", content=prompt)
+                    assistant_message = ChatMessage(session_id=current_session.id, role="assistant", content=response['answer'])
+                    db.add(user_message)
+                    db.add(assistant_message)
+                    db.commit()
+
+                    st.session_state['query_count'] += 1
+                    increment_global_query_count()
+                    
+                    st.rerun()
         
     with tab4:
         st.sidebar.subheader("Admin: Prompt Execution Logs")
@@ -238,6 +242,8 @@ def get_and_display_execution_session(session_id):
             st.markdown(f" ### {log['name']}")
             st.markdown(f" #### {log['short_description']}")
             st.markdown(f"{log['response']}")
+            with st.expander("sources"):
+                st.write(f"Sources: {log['sources']}")
     except Exception as e:
         st.error(str(e))
 

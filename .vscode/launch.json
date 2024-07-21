@@ -11,7 +11,9 @@
             "module": "streamlit",
             "args": [
                 "run",
-                "${file}"
+                "${file}",
+                "--server.port",
+                "8512"
             ]
         },
         {

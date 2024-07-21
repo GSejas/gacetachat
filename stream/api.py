@@ -1,6 +1,6 @@
 import requests 
 
-API_URL = "http://localhost:8007/"
+API_URL = "http://localhost:8050/"
 
 
 def get_execution_session_by_date(date):
@@ -32,3 +32,17 @@ def fetch_recent_exec_logs(limit=3):
     else:
         raise Exception("Failed to load execution logs.")
     
+
+def check_global_limit():
+    response = requests.get(f"{API_URL}/check_global_limit/")
+    if response.status_code == 200:
+        return response.json()["allowed"]
+    else:
+        raise Exception("Failed to check global query limit.")
+
+def increment_global_query_count():
+    response = requests.post(f"{API_URL}/increment_global_query_count/")
+    if response.status_code == 200:
+        return response.json()["success"]
+    else:
+        raise Exception("Failed to increment global query count.")

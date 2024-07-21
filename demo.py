@@ -1,7 +1,6 @@
 
 import streamlit as st
 from models import *
-from process_pdf import process_latest_pdf, search_in_pdf
 # from langchain_openai import OpenAIEmbeddings
 # app.py
 import streamlit as st
@@ -52,8 +51,6 @@ o
 ¡La Municipalidad de Nandayure donará un terreno para salón comunal! 🤩🏡
 La Asamblea Legislativa otorga el Benemérito de las Letras Patrias a Fabián Dobles Rodríguez, un escritor de singulares méritos en el campo de la novela y el cuento 🎉📚
 La Notaría del Estado confeccionará la escritura de traspaso del bien inmueble, para que su obra literaria siga viva 📝📃"""
-        # if st.button("Submit"):
-        # answer = pdf_processor.search_in_pdf(query, index, documents)
         
         
         llm = get_llm(model=config.OPENAI_MODEL_NAME, openai_api_key=config.OPENAI_API_KEY, temperature=config.OPENAI_TEMPERATURE)

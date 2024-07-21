@@ -63,9 +63,20 @@ def execute_content_template_prompts(db: Session, user_id: int, template_id: int
         except Exception as e:
             error_message = f"{str(e)}\n\n{traceback.format_exc()}"
             log = log_prompt_execution(db, session_id, prompt.id, ExecutionState.FAILED.value, error_message=error_message)
-    # session = db.query(ExecutionSession).filter_by(id=session_id).first()
+    session = db.query(ExecutionSession).filter_by(id=session_id).first()
     # session.status = ExecutionState.EXECUTED.value
     # session.completed_at = datetime.now(timezone('America/Costa_Rica'))
+
+    # Check if all prompts have been executed successfully
+    prompts = session.content_template.prompts
+    all_executed = all(get_last_executed_log(db, prompt.id) is not None for prompt in prompts)
+    if all_executed:
+        session.status = ExecutionState.EXECUTED.value
+        session.completed_at = datetime.now(timezone('America/Costa_Rica'))
+    else:
+        session.status = ExecutionState.FAILED.value
+        session.completed_at = None
+
     db.commit()
     return session_id
 
@@ -131,7 +142,8 @@ def run_prompt_by_date(query: str, date: datetime = datetime.now(timezone('Ameri
 def get_execution_session_by_date(db: Session, date: datetime):
     return db.query(ExecutionSession).filter(
         ExecutionSession.created_at >= date,
-        ExecutionSession.created_at < date + timedelta(days=1)
+        ExecutionSession.created_at < date + timedelta(days=1),
+        ExecutionSession.status == ExecutionState.EXECUTED.value
     ).first()
 
 

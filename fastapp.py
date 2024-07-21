@@ -4,25 +4,16 @@ from datetime import datetime, timedelta
 from pytz import timezone
 from db import get_db
 from models import ExecutionSession, ExecutionState, ContentTemplate, ContentExecutionLog, Prompt, PromptQueryResponse, GacetaPDF
-from process_pdf import process_latest_pdf, search_in_pdf
 
-import pytz
-import streamlit as st
 from models import *
-from process_pdf import process_latest_pdf, search_in_pdf
-# from langchain_openai import OpenAIEmbeddings
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from db import get_db
 from typing import List
-import streamlit as st
-import os
 from models import Prompt
-from pdf_processor import PDFProcessor
-from faiss_helper import FAISSHelper
 from logging_setup import setup_logging
 from config import config
-from qa import get_llm, query_folder
+from services.counter import check_global_limit, increment_global_query_count
 
 setup_logging()
 
@@ -194,7 +185,21 @@ async def get_content_logs_api(
     return get_content_logs(db, params)
 
 
+@app.get("/check_global_limit/")
+async def check_global_limit_api(db: Session = Depends(get_db)):
+    if check_global_limit(db):  
+        return {"allowed": True}
+    else:
+        return {"allowed": False}
+
+@app.post("/increment_global_query_count/")
+async def increment_global_query_count_api(db: Session = Depends(get_db)):
+    if check_global_limit(db):
+        increment_global_query_count(db)
+        return {"success": True}
+    else:
+        raise HTTPException(status_code=429, detail="Global query limit reached")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8007)
+    uvicorn.run(app, host="127.0.0.1", port=8050)

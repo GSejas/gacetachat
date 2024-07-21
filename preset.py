@@ -57,27 +57,22 @@ def create_preset_data(db: Session):
         {
             "name": "Headline Prompt",
             "description": "Identify the top news headlines in today's Gaceta.",
-            "text": "What are the top news headlines in today's Gaceta?"
+            "text": "What are the top news headlines in today's Gaceta? Make it humorous, but professional. Relatable."
         },
         {
             "name": "Economic Updates Prompt",
             "description": "Summarize the economic updates in today's Gaceta.",
-            "text": "Summarize the economic updates in today's Gaceta."
+            "text": "Summarize the economic updates in today's Gaceta. Make it humorous, but professional. Relatable."
         },
         {
             "name": "Legal Changes Prompt",
             "description": "Highlight the legal changes mentioned in today's Gaceta.",
-            "text": "What legal changes are mentioned in today's Gaceta?"
-        },
-        {
-            "name": "Cultural Events Prompt",
-            "description": "Highlight the cultural events listed in today's Gaceta.",
-            "text": "Highlight the cultural events listed in today's Gaceta."
+            "text": "What legal changes are mentioned in today's Gaceta? Make it humorous, but professional. Relatable."
         },
         {
             "name": "Environmental News Prompt",
             "description": "Summarize the environmental news covered in today's Gaceta.",
-            "text": "What environmental news is covered in today's Gaceta?"
+            "text": "What environmental news is covered in today's Gaceta? Make it humorous, but professional. Relatable."
         }
     ]
     for prompt_data in prompts:

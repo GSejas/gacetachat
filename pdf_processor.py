@@ -34,8 +34,3 @@ class PDFProcessor:
         session.close()
         return None, None
 
-    def search_in_pdf(self, query, index, documents):
-        # query_vector = self.faiss_helper.embeddings.embed(query).reshape(1, -1)
-        relevant_docs = index.similarity_search(query, k=5)#
-        # return documents[I[0][0]].text
-        return relevant_docs

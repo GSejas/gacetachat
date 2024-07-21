@@ -34,7 +34,6 @@ class Prompt(Base):
     id = Column(Integer, primary_key=True)
     template_id = Column(Integer, ForeignKey('content_templates.id'))
     prompt_text = Column(Text)
-    template = relationship("ContentTemplate", back_populates="prompts")
     name = Column(String(255))
     short_description = Column(Text)
 
@@ -62,7 +61,7 @@ class ExecutionSession(Base):
     user = relationship("User")
     logs = relationship("ContentExecutionLog", back_populates="execution_session")
     messages  = relationship("ChatMessage", back_populates="chat_session")
-    gaceta = relationship("GacetaPDF")
+    gaceta = relationship("GacetaPDF", back_populates="exec_sess")
 
 
 
@@ -94,8 +93,8 @@ class ContentExecutionLog(Base):
     user = relationship("User")
     template = relationship("ContentTemplate")
     prompt = relationship("Prompt")
-    output = relationship("PromptQueryResponse")
-    execution_session = relationship("ExecutionSession")
+    output = relationship("PromptQueryResponse", back_populates="execution_logs")
+    execution_session = relationship("ExecutionSession", back_populates="logs")
 
     def to_json(self):
         return {
@@ -133,6 +132,15 @@ class GacetaPDF(Base):
     file_path = Column(String, nullable=False)
 
     exec_sess = relationship("ExecutionSession", back_populates="gaceta")
+
+from sqlalchemy import Column, Integer, Date, create_engine
+
+class GlobalQueryCount(Base):
+    __tablename__ = "global_query_counts"
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(Date, unique=True, index=True)
+    count = Column(Integer, default=0)
+
 
 from db import engine
 

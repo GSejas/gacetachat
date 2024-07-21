@@ -3,7 +3,7 @@ import os
 import schedule
 import time
 import requests
-from models import GacetaPDF#, Session
+from models import ExecutionState, GacetaPDF#, Session
 from db import Session
 # def fetch_pdf(url):
 #     import requests
@@ -18,6 +18,8 @@ from datetime import datetime, timedelta
 import pytz
 from crud import execute_content_template_prompts
 import logging
+from logging_setup import setup_logging
+setup_logging()
 
 
 def download_pdf():
@@ -33,20 +35,6 @@ def download_pdf():
         return pdf_response.content
     else:
         return None
-
-# def save_pdf_to_db(pdf_data, date_str):
-#     from datetime import datetime
-#     directory = f"gaceta_pdfs/{date_str}"
-#     os.makedirs(directory, exist_ok=True)
-#     file_path = os.path.join(directory, "gaceta.pdf")
-#     with open(file_path, "wb") as f:
-#         f.write(pdf_data)
-    
-#     session = Session()
-#     gaceta = GacetaPDF(date=datetime.strptime(date_str, "%Y-%m-%d"), file_path=file_path)
-#     session.add(gaceta)
-#     session.commit()
-#     session.close()
 
 
 def save_pdf_to_db(file_path, date_str):
@@ -95,9 +83,6 @@ def download_daily_gaceta():
 
     session.close()     
 
-# schedule.every().day.at("00:34").do(download_daily_gaceta)
-
-# Schedule to run every minute for testing
 
 
 def check_and_download_today_pdf():
@@ -133,7 +118,7 @@ def check_and_download_today_pdf():
 
     date_obj = datetime.strptime(date_str, '%Y-%m-%d')
     session_for_today = get_execution_session_by_date(session, date_obj)
-    if session_for_today is None:
+    if session_for_today is None or session_for_today.status != ExecutionState.EXECUTED.value:
         execute_content_template_prompts(session, None, 1, gaceta_id=existing_gaceta.id)
     else:
         if session_for_today.document_id is None:
