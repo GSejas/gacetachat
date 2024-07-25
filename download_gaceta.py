@@ -9,14 +9,13 @@ from db import Session
 #     import requests
 from bs4 import BeautifulSoup
 from config import config
-from crud import PromptExecutionEngine, get_execution_session_by_date, execute_content_template_prompts
+from crud import PromptExecutionEngine, get_execution_session_by_date
 import datetime
 
 from pdf_processor import PDFProcessor
 from faiss_helper import FAISSHelper
 from datetime import datetime, timedelta
 import pytz
-from crud import execute_content_template_prompts
 import logging
 from logging_setup import setup_logging
 setup_logging()
@@ -121,8 +120,10 @@ def check_and_download_today_pdf():
     
     prompt_execution_engine = PromptExecutionEngine(session)
     
+    if isinstance(session_for_today, list):
+        session_for_today = session_for_today[0] if session_for_today else None
+    
     if (session_for_today is None or session_for_today.status != ExecutionState.EXECUTED.value) and existing_gaceta is not None:
-        # execute_content_template_prompts(session, None, 1, gaceta_id=existing_gaceta.id)
         prompt_execution_engine.execute_content_template_prompts(None, 1, gaceta_id=existing_gaceta.id)
     else:
         if session_for_today.document_id is None:

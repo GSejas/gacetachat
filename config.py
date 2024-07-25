@@ -10,7 +10,7 @@ class Config:
     FAISS_INDEX_DIR = "faiss_indexes"
     GACETA_PDFS_DIR = "gaceta_pdfs"
     OPENAI_MODEL_NAME = "gpt-4o"  # or any other model you prefer
-    OPENAI_MAX_TOKENS = 1500
-    OPENAI_TEMPERATURE = 0.7
+    OPENAI_MAX_TOKENS = 2000
+    OPENAI_TEMPERATURE = 0.3
 
 config = Config()

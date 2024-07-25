@@ -109,11 +109,6 @@ def main():
     st.sidebar.write(selected_day)
     tab1, tab2, tab4, tab5, tab6 = st.tabs(["Today's Processed Prompts", "Chat with Today's PDF", "Admin", "Tweet Integration", "Tweet Manager"])
     with tab1:
-        # if st.button("Process Today's Prompts"):
-        #     session_id = execute_content_template_prompts(user_id, template_id)
-        #     st.success("Today's prompts have been processed.")
-        
-        # if st.button("Load Today's Prompts"):
         session = get_execution_session_by_date(selected_day)
         session_id = session['id']
         # st.header(f"Session ID: {session_id}")

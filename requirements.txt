@@ -6,3 +6,4 @@ python-dotenv
 langchain-openai
 streamlit-antd-components
 beautifulsoup4
+streamlit-pdf-viewer

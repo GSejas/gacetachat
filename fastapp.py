@@ -95,37 +95,6 @@ async def list_available_index_days_api(db: Session = Depends(get_db)):
     days = list_available_index_days(db)
     return [day[0] for day in days]
 
-@app.post("/execute_daily_prompts/")
-async def execute_daily_prompts(user_id: int, template_id: int, db: Session = Depends(get_db)):
-    session_id = create_execution_session(db, user_id, template_id)
-    prompts = db.query(Prompt).filter_by(template_id=template_id).all()
-    for prompt in prompts:
-        try:
-            response_text = run_prompt_by_date(prompt.prompt_text, db)  # Function to execute the prompt
-            log = log_prompt_execution(session_id, prompt.id, ExecutionState.EXECUTED.value, db)
-            query = PromptQueryResponse(
-                raw_prompt=response_text['partial'].format(), 
-                response=response_text['answer'], 
-                prompt_template_id=prompt.id,   
-                sources=str(response_text['sources'])
-            )
-            
-            db.add(query)
-            db.commit()
-            
-            log.query_response_id = query.id
-            log.execution_session_id = session_id
-            log.template_id = template_id
-            db.commit()
-    
-        except Exception as e:
-            log_prompt_execution(session_id, prompt.id, ExecutionState.FAILED.value, str(e), db)
-    session = db.query(ExecutionSession).filter_by(id=session_id).first()
-    session.status = ExecutionState.EXECUTED.value
-    session.completed_at = datetime.now(timezone('America/Costa_Rica'))
-    db.commit()
-    return {"session_id": session_id}
-
 
 
 @app.get("/execution_session/", response_model=List[dict])
@@ -369,7 +338,7 @@ async def post_tweet_api(tweet_text: str):
 
 from datetime import date as date_type
 @app.get("/gacetas")
-async def get_gacetas(db: Session = Depends(get_db), date: Optional[date_type] = None, order: Optional[str] = "desc"):
+async def get_gacetas_api(db: Session = Depends(get_db), date: Optional[date_type] = None, order: Optional[str] = "desc"):
     try:
         query = db.query(GacetaPDF)
         if date:

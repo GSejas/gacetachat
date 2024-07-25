@@ -1,7 +1,6 @@
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
-from pytz import timezone
+from datetime import datetime
 from models import *
 
 from pdf_processor import PDFProcessor
@@ -153,7 +152,7 @@ class PromptExecutionEngine:
             ])
             return {
                 "answer":result.content,
-                "partial": query``,
+                "partial": query,
                 "sources": [],
                 "ai_references": None,
             }
@@ -197,55 +196,61 @@ class PromptExecutionEngine:
                                     model=model,
                                     date=date if prompt.doc_aware else None, 
                                     temperature=temp, max_tokens=max_tokens)
-            
+    
+    def get_prompts(self, template_id, re_execute):
+        if re_execute:
+            return self.db.query(Prompt).filter_by(template_id=template_id).all()
+        return self.get_scheduled_prompts(template_id)
+
+    def process_prompts(self, prompts, session_id):
+        for prompt in prompts:
+            try:
+                self.execute_and_log_prompt(prompt, session_id)
+            except Exception as e:
+                self.log_execution_failure(prompt, session_id, e)
+                
+                
+    def log_execution_failure(self, prompt, session_id, exception):
+        error_message = f"{str(exception)}\n\n{traceback.format_exc()}"
+        self.log_prompt_execution(session_id, prompt.id, ExecutionState.FAILED.value, error_message=error_message)
+
+
+    def execute_and_log_prompt(self, prompt, session_id):
+        response_text = self.execute_prompt(prompt, session_id)
+        query = PromptQueryResponse(
+            raw_prompt=response_text['partial'].format() if response_text['partial'] else None,
+            response=response_text['answer'], 
+            prompt_template_id=prompt.id,   
+            sources=str(response_text['sources'])
+        )
+        self.db.add(query)
+        self.db.commit()
+        self.log_prompt_execution(session_id, prompt.id, ExecutionState.EXECUTED.value, query_response_id=query.id, template_id=prompt.template_id)
+
+    def update_session_status(self, session_id, prompts):
+        session = self.db.query(ExecutionSession).filter_by(id=session_id).first()
+        all_executed = all(get_last_executed_log(self.db, prompt.id, session_id) is not None for prompt in prompts)
+        session.status = ExecutionState.EXECUTED.value if all_executed else ExecutionState.FAILED.value
+        session.completed_at = datetime.now() if all_executed else None
+        self.db.commit()
+
+    
     def execute_content_template_prompts(self, user_id: int, template_id: int, gaceta_id=None, re_execute=False):
         session_id = self.create_execution_session(user_id, template_id, gaceta_id)
         prompts = self.get_scheduled_prompts(template_id) if not re_execute else self.db.query(Prompt).filter_by(template_id=template_id).all()
         
-        for prompt in prompts:
-            try:
-                response_text = self.execute_prompt(prompt, session_id)
-                query = PromptQueryResponse(
-                    raw_prompt=response_text['partial'].format() if response_text['partial'] else None,
-                    response=response_text['answer'], 
-                    prompt_template_id=prompt.id,   
-                    sources=str(response_text['sources'])
-                )
-                self.db.add(query)
-                self.db.commit()
-                self.log_prompt_execution(session_id, prompt.id, ExecutionState.EXECUTED.value, query_response_id=query.id, template_id=prompt.template_id)
-            except Exception as e:
-                error_message = f"{str(e)}\n\n{traceback.format_exc()}"
-                self.log_prompt_execution(session_id, prompt.id, ExecutionState.FAILED.value, error_message=error_message)
-        
-        session = self.db.query(ExecutionSession).filter_by(id=session_id).first()
-        # prompts = session.content_template.prompts
-        all_executed = all(get_last_executed_log(self.db, prompt.id, session_id) is not None for prompt in prompts)
-        if all_executed:
-            session.status = ExecutionState.EXECUTED.value
-            session.completed_at = datetime.now()
-        else:
-            session.status = ExecutionState.FAILED.value
-            session.completed_at = None
-        self.db.commit()
+        self.process_prompts(prompts, session_id)
+        self.update_session_status(session_id, prompts)
         return session_id
 
     def re_execute_prompt(self, session_id: str, prompt_id: int, **kargs):
         prompt = self.db.query(Prompt).filter_by(id=prompt_id).first()
         if prompt:
+            
             try:
-                response_text = self.execute_prompt(prompt, session_id, **kargs)
-                query = PromptQueryResponse(
-                    raw_prompt=response_text['partial'].format() if response_text['partial'] else None,
-                    response=response_text['answer'], 
-                    prompt_template_id=prompt.id, 
-                    sources=str(response_text['sources'])
-                )
-                self.db.add(query)
-                self.db.commit()
-                self.log_prompt_execution(session_id, prompt.id, ExecutionState.EXECUTED.value, query_response_id=query.id, template_id=prompt.template_id)
+                self.execute_and_log_prompt(prompt, session_id)
             except Exception as e:
-                self.log_prompt_execution(session_id, prompt.id, ExecutionState.FAILED.value, error_message=str(e))
+                self.log_execution_failure(prompt, session_id, e)
 
     def get_execution_session_prompts_results(self, session_id: str):
         session = self.db.query(ExecutionSession).filter_by(id=session_id).first()
@@ -287,101 +292,22 @@ class PromptExecutionEngine:
 
 # Other CRUD functions remain unchanged
 
-
-
-
-def execute_content_template_prompts(db: Session, user_id: int, template_id: int, gaceta_id=None):
-    session_id = create_execution_session(db, user_id, template_id, gaceta_id)
-    prompts = db.query(Prompt).filter_by(template_id=template_id).all()
-    for prompt in prompts:
-        try:
-            response_text = run_prompt_by_date(prompt.prompt_text)
-            query = PromptQueryResponse(
-                raw_prompt=response_text['partial'].format(), 
-                response=response_text['answer'], 
-                prompt_template_id=prompt.id,   
-                sources=str(response_text['sources'])
-            )
-            db.add(query)
-            db.commit()
-            log = log_prompt_execution(db, session_id, prompt.id, ExecutionState.EXECUTED.value, query_response_id=query.id, template_id=prompt.template_id)
-        except Exception as e:
-            error_message = f"{str(e)}\n\n{traceback.format_exc()}"
-            log = log_prompt_execution(db, session_id, prompt.id, ExecutionState.FAILED.value, error_message=error_message)
-    session = db.query(ExecutionSession).filter_by(id=session_id).first()
-    # session.status = ExecutionState.EXECUTED.value
-    # session.completed_at = datetime.now(timezone('America/Costa_Rica'))
-
-    # Check if all prompts have been executed successfully
-    prompts = session.content_template.prompts
-    all_executed = all(get_last_executed_log(db, prompt.id, session_id) is not None for prompt in prompts)
-    if all_executed:
-        session.status = ExecutionState.EXECUTED.value
-        session.completed_at = datetime.now(timezone('America/Costa_Rica'))
-    else:
-        session.status = ExecutionState.FAILED.value
-        session.completed_at = None
-
-    db.commit()
-    return session_id
-
-def re_run_prompt(db: Session, prompt_id: int, session_id: int):
-    prompt = db.query(Prompt).filter_by(id=prompt_id).first()
-    if prompt:
-        try:
-            response_text = run_prompt_by_date(prompt.prompt_text)
-            query = PromptQueryResponse(
-                raw_prompt=response_text['partial'].format(), 
-                response=response_text['answer'], 
-                prompt_template_id=prompt.id, 
-                sources=str(response_text['sources'])
-            )
-            db.add(query)
-            db.commit()
-            log = log_prompt_execution(db, session_id, prompt.id, ExecutionState.EXECUTED.value, query_response_id=query.id, template_id=prompt.template_id)
-        except Exception as e:
-            log_prompt_execution(db, session_id, prompt.id, ExecutionState.FAILED.value, error_message=str(e))
-
-def create_execution_session(db: Session, user_id: int, template_id: int, gaceta_id:int):
-    new_session = ExecutionSession(
-        content_template_id=template_id,
-        user_id=user_id,
-        status=ExecutionState.INIT.value,
-        created_at=datetime.now(timezone('America/Costa_Rica')),
-        document_id=gaceta_id
-    )
-    db.add(new_session)
-    db.commit()
-    return new_session.id
-
-def log_prompt_execution(db: Session, session_id: int, prompt_id: int, state: str, error_message: str = None, **kwargs):
-    log_entry = ContentExecutionLog(
-        execution_session_id=session_id,
-        prompt_id=prompt_id,
-        state=state,
-        error_message=error_message,
-        **kwargs
-    )
-    db.add(log_entry)
-    db.commit()
-    return log_entry
-
-def run_prompt_by_date(query: str, date: datetime = datetime.now(timezone('America/Costa_Rica')).date()):
-    faiss_helper = FAISSHelper()
-    latest_gaceta_dir = os.path.join(config.GACETA_PDFS_DIR, datetime.now(timezone('America/Costa_Rica')).strftime("%Y-%m-%d"))
+# def run_prompt_by_date(query: str, date: datetime = datetime.now(timezone('America/Costa_Rica')).date()):
+#     faiss_helper = FAISSHelper()
+#     latest_gaceta_dir = os.path.join(config.GACETA_PDFS_DIR, datetime.now(timezone('America/Costa_Rica')).strftime("%Y-%m-%d"))
     
-    # Placeholder function for running the prompt. Replace with actual logic.
-    if os.path.exists(os.path.join(latest_gaceta_dir, "index.faiss")):
-        db = faiss_helper.load_faiss_index(latest_gaceta_dir)
+#     # Placeholder function for running the prompt. Replace with actual logic.
+#     if os.path.exists(os.path.join(latest_gaceta_dir, "index.faiss")):
+#         db = faiss_helper.load_faiss_index(latest_gaceta_dir)
             
-        llm = get_llm(model=config.OPENAI_MODEL_NAME, openai_api_key=config.OPENAI_API_KEY, temperature=config.OPENAI_TEMPERATURE)
-        result = query_folder(
-            folder_index=db,
-            query=query,
-            llm=llm,
-        )
+#         llm = get_llm(model=config.OPENAI_MODEL_NAME, openai_api_key=config.OPENAI_API_KEY, temperature=config.OPENAI_TEMPERATURE)
+#         result = query_folder(
+#             folder_index=db,
+#             query=query,
+#             llm=llm,
+#         )
         
-        return result
+#         return result
 
 
 def get_execution_session_by_date(db: Session, date: datetime):

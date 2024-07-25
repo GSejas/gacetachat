@@ -81,14 +81,14 @@ def post_tweet_form():
             st.error("Error posting tweet: " + response.json().get("detail", "Unknown error"))
 
 
-def make_get_request(endpoint, params=None):
+def get_gacetas(endpoint, params=None):
     response = requests.get(f"{API_URL}{endpoint}", params=params, headers={"X-API-KEY": APP_SECRET_API_KEY})
     return response
 
 
 def list_gacetas():
     st.title("Gacetas List")
-    response = make_get_request("/gacetas", params={'order': 'desc'})
+    response = get_gacetas("/gacetas", params={'order': 'desc'})
     
     # response = requests.get(f"{API_URL}/gacetas", headers={"X-API-KEY": APP_SECRET_API_KEY})
     if response.status_code == 200:

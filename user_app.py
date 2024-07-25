@@ -113,10 +113,6 @@ def main():
     st.session_state.date = selected_day
     tab1, tab2, tab4 = st.tabs(["Today's Processed Prompts", "Chat with Today's PDF", "About"])
     with tab1:
-        # if st.button("Process Today's Prompts"):
-        #     session_id = execute_content_template_prompts(user_id, template_id)
-        #     st.success("Today's prompts have been processed.")
-        # if st.button("Load Today's Prompts"):
         xec_sessions = get_execution_session_by_date(selected_day)
         session_ids = [session['id'] for session in xec_sessions]
         session_id = st.selectbox("Select Session", session_ids)

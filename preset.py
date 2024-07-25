@@ -28,15 +28,65 @@ La Asamblea Legislativa otorga el Benemérito de las Letras Patrias a Fabián Do
 La Notaría del Estado confeccionará la escritura de traspaso del bien inmueble 📝📃Pg. 48"""
 
 # New Newsletter Prompt
-newsletter_prompt = """Genera un boletín digital con las noticias más importantes de la Gaceta de hoy. 
+newsletter_prompt = """actua como un redactor experimentado, nacido en San Jose y educado. Tono profesional e ironico.
+
+Genera un boletín digital con las noticias más importantes de la Gaceta de hoy. 
 Utiliza los resultados de las consultas anteriores y asegúrate de que sea conciso y claro.
 
 Las siguientes son los resultados de sub resumenes anteriores:
-twitter_summary: [{{twitter_summary}}]
-headline_summary: [{{headline_summary}}]
-economic_updates: [{{economic_updates}}]
-legal_changes: [{{legal_changes}}]
-environmental_news: [{{environmental_news}}]
+
+twitter_summary: {{twitter_summary}}
+
+headline_summary: {{headline_summary}}
+
+economic_updates: {{economic_updates}}
+
+legal_changes: {{legal_changes}}
+
+environmental_news: {{environmental_news}}
+
+## Output Format:
+
+return in plain text markdown, fit for an email newsletter. Should be easy to parse the different sections. 
+add captions when relevant
+images should be inserted according to markdown format.
+when relevant, point the user to download the gaceta or chat with it at [APP_URL_BASE]/Chat?date=2021-01-01. should be today's gaceta date. 
+Return as hyperlink. It should re-direct the user to today's chat.
+
+Answer the content with the []-style variables (i.e [URL_ECON_IMAGE_SECTION]) These will be like placeholders for the actual image.
+
+
+Newsletter Title: Boletín Digital de La Gaceta Nº 13X
+Date: 
+Banner Image: A vibrant banner representing Costa Rica or a digital wave theme.
+
+Introduction
+Welcome Message: A warm introduction highlighting the key stories and topics covered in this edition.
+Table of Contents: A brief overview of the sections with anchor links for easy navigation.
+
+
+Main News 📰
+Image: https://i.ibb.co/Wxq8FMY/0-minimalistic-vector-graphics-white-framed-thema-esrgan-v1-x2plus.png
+Headline: Clear and compelling.
+
+Economic News 📈
+Image: https://i.ibb.co/kKFChpR/0-minimalistic-vector-graphics-3-main-colors-whit-esrgan-v1-x2plus-2.png
+Headline: Informative and engaging.
+
+Law News ⚖️
+Image: https://i.ibb.co/C9gH6GP/0-minimalistic-vector-graphics-3-main-colors-whit-esrgan-v1-x2plus-1.png
+Headline: Direct and authoritative.
+
+Environmental News 🌳
+Image: https://i.ibb.co/k5vVhS2/0-minimalistic-vector-graphics-3-main-colors-whit-esrgan-v1-x2plus-4.png
+Headline: Clear and impactful.
+
+Closing Section
+
+Thank You Note: Express gratitude to readers for their time and engagement.
+Social Media Links: Icons linking to your social media platforms (Twitter (https://x.com/GacetaCRBot)).
+Contact Information: Email (aideationcr@gmail.com), phone number (+506 8510-0213), and address for further inquiries.
+Unsubscribe Option: A link for readers to unsubscribe if they choose to. Subscribe link is [APP_URL_BASE]/unsubscribe
 """
 
 def create_preset_data(db: Session):
@@ -68,7 +118,7 @@ def create_preset_data(db: Session):
         {
             "name": "Headline Prompt",
             "description": "Identify the top news headlines in today's Gaceta.",
-            "text": "What are the top news headlines in today's Gaceta? Make it humorous, but professional. Relatable. For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
+            "text": "What are the top news headlines in today's Gaceta? For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
             "alias": "headline_summary",
             "scheduled_execution": True,
             "doc_aware": True
@@ -76,7 +126,7 @@ def create_preset_data(db: Session):
         {
             "name": "Economic Updates Prompt",
             "description": "Summarize the economic updates in today's Gaceta.",
-            "text": "Summarize the economic updates in today's Gaceta. Make it humorous, but professional. Relatable. For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
+            "text": "Summarize the economic updates in today's Gaceta. For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
             "alias": "economic_updates",
             "scheduled_execution": True,
             "doc_aware": True
@@ -84,7 +134,7 @@ def create_preset_data(db: Session):
         {
             "name": "Legal Changes Prompt",
             "description": "Highlight the legal changes mentioned in today's Gaceta.",
-            "text": "What legal changes are mentioned in today's Gaceta? Make it humorous, but professional. Relatable. For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
+            "text": "What legal changes are mentioned in today's Gaceta? For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
             "alias": "legal_changes",
             "scheduled_execution": True,
             "doc_aware": True
@@ -92,7 +142,7 @@ def create_preset_data(db: Session):
         {
             "name": "Environmental News Prompt",
             "description": "Summarize the environmental news covered in today's Gaceta.",
-            "text": "What environmental news is covered in today's Gaceta? Make it humorous, but professional. Relatable. For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
+            "text": "What environmental news is covered in today's Gaceta? For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
             "alias": "environmental_news",
             "scheduled_execution": True,
             "doc_aware": True
