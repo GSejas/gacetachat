@@ -9,7 +9,7 @@ from db import Session
 #     import requests
 from bs4 import BeautifulSoup
 from config import config
-from crud import get_execution_session_by_date, execute_content_template_prompts
+from crud import PromptExecutionEngine, get_execution_session_by_date, execute_content_template_prompts
 import datetime
 
 from pdf_processor import PDFProcessor
@@ -118,8 +118,12 @@ def check_and_download_today_pdf():
 
     date_obj = datetime.strptime(date_str, '%Y-%m-%d')
     session_for_today = get_execution_session_by_date(session, date_obj)
-    if session_for_today is None or session_for_today.status != ExecutionState.EXECUTED.value:
-        execute_content_template_prompts(session, None, 1, gaceta_id=existing_gaceta.id)
+    
+    prompt_execution_engine = PromptExecutionEngine(session)
+    
+    if (session_for_today is None or session_for_today.status != ExecutionState.EXECUTED.value) and existing_gaceta is not None:
+        # execute_content_template_prompts(session, None, 1, gaceta_id=existing_gaceta.id)
+        prompt_execution_engine.execute_content_template_prompts(None, 1, gaceta_id=existing_gaceta.id)
     else:
         if session_for_today.document_id is None:
             session_for_today.document_id = existing_gaceta.id
@@ -131,9 +135,30 @@ logging.basicConfig(filename='download.log', level=logging.INFO, format='%(ascti
 
 
 
+def initial_check_and_create_missing_entries():
+    session = Session()
+    directory = config.GACETA_PDFS_DIR
+    
+    for date_folder in os.listdir(directory):
+        folder_path = os.path.join(directory, date_folder)
+        if os.path.isdir(folder_path):
+            date_str = date_folder
+            try:
+                datetime.strptime(date_str, "%Y-%m-%d")
+                existing_gaceta = session.query(GacetaPDF).filter_by(date=datetime.strptime(date_str, "%Y-%m-%d")).first()
+                if not existing_gaceta:
+                    file_path = os.path.join(folder_path, "gaceta.pdf")
+                    if os.path.exists(file_path):
+                        logging.info(f"Folder for {date_str} exists, but no DB entry found. Creating DB entry.")
+                        save_pdf_to_db(file_path, date_str)
+            except ValueError:
+                logging.warning(f"Skipping invalid date folder: {date_folder}")
+    session.close()
+
 schedule.every(1).minutes.do(check_and_download_today_pdf)
 
 if __name__ == "__main__":
+    initial_check_and_create_missing_entries()
     check_and_download_today_pdf()
     while True:
         schedule.run_pending()

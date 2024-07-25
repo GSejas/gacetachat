@@ -1,35 +1,43 @@
 from sqlalchemy.orm import Session
-
 from db import get_db
-from langchain_openai import OpenAIEmbeddings
-
 from models import ContentTemplate, Prompt
 
-db_session = next(get_db())
-
+# Existing Twitter Prompt
 twitter_prompt = """Crea un resumen humorístico de las 3 noticias más importantes de la Gazeta de hoy en un lenguaje sencillo. 
 Usa menos de 200 caracteres por twitter (un twitter serian las 3 noticias, queberia hacer en total 200 o menos characters). Sé divertido y memorable, informando de forma simple y jocosa. 
 Dirígete al público costarricense. 
 Usa emojis. No digas cosas redundantes. Utiliza el contexto dado sobre la gaceta de hoy. Tal vez no sea super completo pero es todo lo que tenemos.
 
 Ejemplo:
-¡El tren eléctrico vuelve! Ahora sí, después de años, el tren vuelve a rodar por Costa Rica 🚂🎉
-Se declara alerta roja por contaminación en el río Virilla. ¡Cuidado al bañarse! 🚫💦
-Los chicos del fútbol ganaron el partido de hoy. ¡Qué jugada! ¡Qué partidazo! ⚽🏆
+La Gaceta Nº 133
+¡El tren eléctrico vuelve! Ahora sí, después de años, el tren vuelve a rodar por Costa Rica 🚂🎉 Pg. 3 
+Se declara alerta roja por contaminación en el río Virilla. ¡Cuidado al bañarse! 🚫💦 Pg. 6-7
+Los chicos del fútbol ganaron el partido de hoy. ¡Qué jugada! ¡Qué partidazo! ⚽🏆 Pg. 48
 
 o
 
-1: 🤩 La Municipalidad de Nandayure cede 1515 m2 para usos comunales, incentivando el desarrollo local.
-2: 🤩 Fabián Dobles Rodríguez recibe el galardón de Benemérito de las Letras Patrias por su aporte a la literatura.
-3: 🤬 Costa Rica incluida en el catálogo fiscal adverso, pero hay un proyecto de ley para cambiarlo. ¡Actuemos!
+La Gaceta Nº 55
+1: 🤩 La Municipalidad de Nandayure cede 1515 m2 para usos comunales, incentivando el desarrollo local. Pg. 3 
+2: 🤩 Fabián Dobles Rodríguez recibe el galardón de Benemérito de las Letras Patrias por su aporte a la literatura. Pg. 6-7
+3: 🤬 Costa Rica incluida en el catálogo fiscal adverso, pero hay un proyecto de ley para cambiarlo. ¡Actuemos! Pg. 48
 
 o
-¡La Municipalidad de Nandayure donará un terreno para salón comunal! 🤩🏡
-La Asamblea Legislativa otorga el Benemérito de las Letras Patrias a Fabián Dobles Rodríguez 🎉📚
-La Notaría del Estado confeccionará la escritura de traspaso del bien inmueble 📝📃"""
+La Gaceta Nº 555
+¡La Municipalidad de Nandayure donará un terreno para salón comunal! 🤩🏡 Pg. 3
+La Asamblea Legislativa otorga el Benemérito de las Letras Patrias a Fabián Dobles Rodríguez 🎉📚 Pg. 6-7
+La Notaría del Estado confeccionará la escritura de traspaso del bien inmueble 📝📃Pg. 48"""
 
+# New Newsletter Prompt
+newsletter_prompt = """Genera un boletín digital con las noticias más importantes de la Gaceta de hoy. 
+Utiliza los resultados de las consultas anteriores y asegúrate de que sea conciso y claro.
 
-
+Las siguientes son los resultados de sub resumenes anteriores:
+twitter_summary: [{{twitter_summary}}]
+headline_summary: [{{headline_summary}}]
+economic_updates: [{{economic_updates}}]
+legal_changes: [{{legal_changes}}]
+environmental_news: [{{environmental_news}}]
+"""
 
 def create_preset_data(db: Session):
     # Check if the preset content template already exists
@@ -51,28 +59,51 @@ def create_preset_data(db: Session):
     prompts = [
         {
             "name": "Twitter Prompt",
-            "description": "Create a humorous summary of the top 3 news in the Gazeta today.",
-            "text": twitter_prompt
+            "description": "Create a summary of the top 3 news in the Gazeta today. ",
+            "text": twitter_prompt,
+            "alias": "twitter_summary",
+            "scheduled_execution": True,
+            "doc_aware": True
         },
         {
             "name": "Headline Prompt",
             "description": "Identify the top news headlines in today's Gaceta.",
-            "text": "What are the top news headlines in today's Gaceta? Make it humorous, but professional. Relatable."
+            "text": "What are the top news headlines in today's Gaceta? Make it humorous, but professional. Relatable. For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
+            "alias": "headline_summary",
+            "scheduled_execution": True,
+            "doc_aware": True
         },
         {
             "name": "Economic Updates Prompt",
             "description": "Summarize the economic updates in today's Gaceta.",
-            "text": "Summarize the economic updates in today's Gaceta. Make it humorous, but professional. Relatable."
+            "text": "Summarize the economic updates in today's Gaceta. Make it humorous, but professional. Relatable. For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
+            "alias": "economic_updates",
+            "scheduled_execution": True,
+            "doc_aware": True
         },
         {
             "name": "Legal Changes Prompt",
             "description": "Highlight the legal changes mentioned in today's Gaceta.",
-            "text": "What legal changes are mentioned in today's Gaceta? Make it humorous, but professional. Relatable."
+            "text": "What legal changes are mentioned in today's Gaceta? Make it humorous, but professional. Relatable. For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
+            "alias": "legal_changes",
+            "scheduled_execution": True,
+            "doc_aware": True
         },
         {
             "name": "Environmental News Prompt",
             "description": "Summarize the environmental news covered in today's Gaceta.",
-            "text": "What environmental news is covered in today's Gaceta? Make it humorous, but professional. Relatable."
+            "text": "What environmental news is covered in today's Gaceta? Make it humorous, but professional. Relatable. For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
+            "alias": "environmental_news",
+            "scheduled_execution": True,
+            "doc_aware": True
+        },
+        {
+            "name": "Newsletter Prompt",
+            "description": "Generate a newsletter with the most important news from today's Gaceta.",
+            "text": newsletter_prompt,
+            "alias": "newsletter",
+            "scheduled_execution": False,
+            "doc_aware": False
         }
     ]
     for prompt_data in prompts:
@@ -80,11 +111,15 @@ def create_preset_data(db: Session):
             template_id=content_template.id,
             prompt_text=prompt_data["text"],
             name=prompt_data["name"],
-            short_description=prompt_data["description"]
+            short_description=prompt_data["description"],
+            alias=prompt_data["alias"],
+            scheduled_execution=prompt_data["scheduled_execution"],
+            doc_aware=prompt_data["doc_aware"]
         )
         db.add(prompt)
     db.commit()
 
 # Run the function to create preset data
+db_session = next(get_db())
 create_preset_data(db_session)
 db_session.close()

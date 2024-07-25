@@ -28,6 +28,8 @@ class ContentTemplate(Base):
 
     # Relationship with PromptTemplate
     prompts = relationship("Prompt", back_populates="content_template")
+    
+    
 class Prompt(Base):
     __tablename__ = "prompts"
     id = Column(Integer, primary_key=True)
@@ -35,6 +37,9 @@ class Prompt(Base):
     prompt_text = Column(Text)
     name = Column(String(255))
     short_description = Column(Text)
+    alias = Column(String(255), unique=True, nullable=True)  # Add alias field
+    scheduled_execution = Column(Boolean, default=True)  # New field
+    doc_aware = Column(Boolean, default=True)  # New field
 
     content_template = relationship("ContentTemplate", back_populates="prompts")
     
@@ -44,7 +49,9 @@ class Prompt(Base):
             "template_id": self.template_id,
             "prompt_text": self.prompt_text,
             "name": self.name,
-            "short_description": self.short_description
+            "short_description": self.short_description,
+            "alias": self.alias,
+            "scheduled_execution": self.scheduled_execution  # Include in JSON representation
         }
     
 class ExecutionState(enum.Enum):

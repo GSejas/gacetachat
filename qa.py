@@ -72,12 +72,12 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 # from langchain.cache import InMemoryCache
 
 # set_llm_cache(InMemoryCache())
-
 def query_folder(
         query: str,
         folder_index,
         llm: BaseChatModel,
         return_all: bool = False,
+        debug: bool = True,
     ):
     """Queries a folder index for an answer.
 
@@ -92,6 +92,14 @@ def query_folder(
     Returns:
         AnswerWithSources: The answer and the source documents.
     """
+    # if debug:
+    #     return {
+    #         "answer": query,
+    #         "partial": None,
+    #         "sources": [],
+    #         "ai_references": None,
+    #     }
+
     relevant_docs = folder_index.similarity_search(query, k=5)
 
     partial_prompt = STUFF_PROMPT.partial(context=relevant_docs, question=query)

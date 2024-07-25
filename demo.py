@@ -61,19 +61,7 @@ La Notaría del Estado confeccionará la escritura de traspaso del bien inmueble
             llm=llm,
         )
         
-        # st.write(answer)
-        # st.write(str(answer))
         print(result)
-    # st.subheader("Daily Prompts")
-    # session = Session()
-    # prompts = session.query(Prompt).all()
-    # for prompt in prompts:
-    #     st.write(prompt.prompt_text)
-    #     if st.button(f"Submit Answer for Prompt {prompt.id}"):
-    #         answer = st.text_input(f"Your answer for Prompt {prompt.id}")
-    #         # Logic to log the answer can be added here
-
-    # session.close()
 
 if __name__ == "__main__":
     main()

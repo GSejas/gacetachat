@@ -253,30 +253,6 @@ def get_and_display_execution_session(session_id):
         st.error(str(e))
 
 
-def re_run_prompt(prompt_id, session_id):
-    db_session = next(get_db()) 
-    prompt = db_session.query(Prompt).filter_by(id=prompt_id).first()
-    if prompt:
-        try:
-            response_text = run_prompt_by_date(prompt.prompt_text)
-            query = PromptQueryResponse(
-                raw_prompt=response_text['partial'].format(), 
-                response=response_text['answer'], 
-                prompt_template_id=prompt.id, 
-                sources=str(response_text['sources'])
-            )
-            db_session.add(query)
-            db_session.commit()
-            
-            log = log_prompt_execution(session_id, prompt.id, ExecutionState.EXECUTED.value, query_response_id=query.id, template_id=prompt.template_id)
-            # log.query_response_id = query.id
-            # log.execution_session_id = session_id
-            # log.template_id = prompt.template_id
-            # db_session.commit()
-    
-        except Exception as e:
-            log_prompt_execution(session_id, prompt.id, ExecutionState.FAILED.value, error_message=str(e))
-
 
 def run_prompt_by_date(query, date=datetime.strptime(datetime.now(pytz.timezone('America/Costa_Rica')).strftime("%Y-%m-%d"), "%Y-%m-%d")):
     db_session = next(get_db()) 

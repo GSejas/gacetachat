@@ -81,15 +81,24 @@ def post_tweet_form():
             st.error("Error posting tweet: " + response.json().get("detail", "Unknown error"))
 
 
+def make_get_request(endpoint, params=None):
+    response = requests.get(f"{API_URL}{endpoint}", params=params, headers={"X-API-KEY": APP_SECRET_API_KEY})
+    return response
+
+
 def list_gacetas():
     st.title("Gacetas List")
-    response = requests.get(f"{API_URL}/gacetas", headers={"X-API-KEY": APP_SECRET_API_KEY})
+    response = make_get_request("/gacetas", params={'order': 'desc'})
+    
+    # response = requests.get(f"{API_URL}/gacetas", headers={"X-API-KEY": APP_SECRET_API_KEY})
     if response.status_code == 200:
         gacetas = response.json().get("gacetas", [])
-        for gaceta, exec_sessions in gacetas:
+        for gacet in gacetas:
+            gaceta          = gacet['gaceta']
+            twitter_prompts = gacet['twitter_prompts']
             st.subheader(f"ID: {gaceta['id']}, Date: {gaceta['date']}, File Path: {gaceta['file_path']}")
             
-            for sess in exec_sessions:
+            for sess in twitter_prompts:
                 exec_session = sess['exec_session']
                 st.subheader(f"Execution Session: {exec_session['id']}")
                 st.write(f"Start Time: {exec_session['created_at']}")
@@ -127,3 +136,26 @@ def approve_tweet(gaceta_id, content_exec_id, tweet_text):
         st.success("Tweet posted successfully")
     else:
         st.error("Error posting tweet")
+        
+        
+
+def get_me():
+    response = requests.get(f"{API_URL}/twitter/me", headers={"X-API-KEY": APP_SECRET_API_KEY})
+    if response.status_code == 200:
+        user = response.json()
+        st.write(f"User ID: {user['id']}")
+        st.write(f"Name: {user['name']}")
+        st.write(f"Username: {user['username']}")
+    else:
+        st.error("Error fetching user data")
+        
+
+def check_health():
+    try:
+        response = requests.get(f"{API_URL}/health_check", headers={"X-API-KEY": APP_SECRET_API_KEY})
+        if response.status_code == 200:
+            return True
+        else:
+            return False
+    except:
+        return False

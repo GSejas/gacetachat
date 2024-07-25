@@ -116,10 +116,10 @@ def main():
         # if st.button("Process Today's Prompts"):
         #     session_id = execute_content_template_prompts(user_id, template_id)
         #     st.success("Today's prompts have been processed.")
-        
         # if st.button("Load Today's Prompts"):
-        session = get_execution_session_by_date(selected_day)
-        session_id = session['id']
+        xec_sessions = get_execution_session_by_date(selected_day)
+        session_ids = [session['id'] for session in xec_sessions]
+        session_id = st.selectbox("Select Session", session_ids)
         # st.header(f"Session ID: {session_id}")
         st.header("Today's Processed Prompts")
         # Application description

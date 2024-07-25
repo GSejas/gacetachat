@@ -1,7 +1,7 @@
 # from services.counter import check_global_limit, increment_global_query_count
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pytz import timezone
 from db import get_db
 from models import ExecutionSession, ExecutionState, ContentTemplate, ContentExecutionLog, Prompt, PromptQueryResponse, GacetaPDF
@@ -66,13 +66,15 @@ app.add_middleware(
 )
 
 
-# @app.middleware("http")
-# async def api_key_middleware(request: Request, call_next):
-#     api_key = request.headers.get("X-API-KEY")
-#     if api_key != API_KEY:
-#         raise HTTPException(status_code=401, detail="Invalid API Key")
-#     response = await call_next(request)
-#     return response
+@app.middleware("http")
+async def api_key_middleware(request: Request, call_next):
+    api_key = request.headers.get("X-API-KEY")
+    if request.url.path == "/twitter/callback":
+        return await call_next(request)
+    if api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    response = await call_next(request)
+    return response
 
 
 
@@ -80,9 +82,9 @@ app.add_middleware(
 async def get_execution_session(date: str, db: Session = Depends(get_db)):
     try:
         date_obj = datetime.strptime(date, '%Y-%m-%d')
-        session = get_execution_session_by_date(db, date_obj)
-        if session:
-            return session
+        exec_sessions = get_execution_session_by_date(db, date_obj)
+        if exec_sessions:
+            return exec_sessions
         else:
             raise HTTPException(status_code=404, detail="Execution session not found for the given date")
     except ValueError:
@@ -133,7 +135,7 @@ async def execution_session_api(session_id: str, db: Session = Depends(get_db)):
 
 
 from sqlalchemy.orm import Session
-from sqlalchemy import desc, asc
+from sqlalchemy import and_, desc, asc
 # from . import models, schemas
 from pydantic import BaseModel
 from datetime import datetime
@@ -270,7 +272,8 @@ def get_refreshed_access_token():
     try:
         access_token = auth.refresh_token(
             token_url="https://api.twitter.com/2/oauth2/token",
-            refresh_token=refresh_token
+            refresh_token=refresh_token,
+            body=f"grant_type=refresh_token&client_id={twitter_api_key}",
         )
         redis_client.set("access_token", access_token, ex=3600)  # Expire after 1 hour
         return access_token
@@ -301,8 +304,12 @@ async def login():
         raise HTTPException(status_code=500, detail=f"Error! Failed to get authorization URL: {e}")
 
 @app.get("/twitter/callback")
-async def callback(state: str, code: str, code_verifier: str=""):
+# async def callback(request: Request):
+async def callback(state: str, code: str):
+    # state = request.get('state')
+    # code = request.get('code')
     code_verifier = code_verifiers.pop(state, None)
+    
     # if not code_verifier:
     #     raise HTTPException(status_code=400, detail="Invalid state parameter")
 
@@ -360,14 +367,39 @@ async def post_tweet_api(tweet_text: str):
         raise HTTPException(status_code=500, detail=f"Error posting tweet: {e}")
 
 
-
+from datetime import date as date_type
 @app.get("/gacetas")
-async def get_gacetas(db: Session = Depends(get_db)):
-    gacetas = db.query(GacetaPDF).all()
-    res = {"gacetas":[(gaceta.to_json(), get_twitter_prompts(db, gaceta.id, 1)) for gaceta in gacetas]}
-    db.close()
-    return res
+async def get_gacetas(db: Session = Depends(get_db), date: Optional[date_type] = None, order: Optional[str] = "desc"):
+    try:
+        query = db.query(GacetaPDF)
+        if date:
+            start_date = datetime.combine(date, datetime.min.time())
+            end_date = datetime.combine(date, datetime.max.time())
+            query = query.filter(and_(GacetaPDF.date >= start_date, GacetaPDF.date <= end_date))
+        
+        if order == "asc":
+            query = query.order_by(asc(GacetaPDF.date))
+        else:
+            query = query.order_by(desc(GacetaPDF.date))
+        
+        gacetas = query.all()
 
+        res = {
+            "gacetas": [
+                {
+                    "gaceta": gaceta.to_json(),
+                    "twitter_prompts": get_twitter_prompts(db, gaceta.id, 1)
+                }
+                for gaceta in gacetas
+            ]
+        }
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+        
+        
 from pydantic import BaseModel
 
 class ApproveTweetRequest(BaseModel):
@@ -390,6 +422,16 @@ async def approve_tweet(request: ApproveTweetRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error posting tweet: {e}")
 
+
+
+
+
+@app.get("/health_check")
+def health_check():
+    try:
+        return {"status": "healthy"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Service is down")
 
 
 if __name__ == "__main__":

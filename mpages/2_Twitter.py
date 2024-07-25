@@ -23,7 +23,7 @@ from db import get_db
 from pytz import timezone
 
 
-tab5, tab6 , tab7= st.tabs(["Tweet Integration", "Tweet Manager", "Gacetas"])
+tab5, tab6 , tab7, tab8= st.tabs(["Tweet Integration", "Tweet Manager", "Gacetas", "Get User Data"])
 
 
 with tab5:
@@ -32,3 +32,5 @@ with tab6:
     post_tweet_form()
 with tab7:
     list_gacetas()
+# with tab8:
+#     get_me()

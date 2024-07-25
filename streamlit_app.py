@@ -101,8 +101,6 @@ from db import get_db
 
 db = next(get_db())
 
-
-
 def main():
     st.set_page_config(
         page_title="Gaceta AI Admin",
@@ -110,19 +108,55 @@ def main():
         # layout="wide",
         initial_sidebar_state="expanded",
     )
-    pages = {
-        "Dashboard" : [
-            st.Page("mpages\\1_Home.py", title="Home"),
-            st.Page("mpages\\2_Twitter.py", title="TwitterBot Integration"),
-        ],
-        "Admin" : [
-            st.Page("mpages\\3_Admin.py", title="App Logs"),
-        ],
-    }
 
-    pg = st.navigation(pages)
+    # Check the health of the service
+    with st.spinner('Checking service health...'):
+        service_healthy = check_health()
 
-    pg.run()
+    if service_healthy:
+        st.success("Service is up and running!")
+
+        pages = {
+            "Dashboard" : [
+                st.Page("mpages\\1_Home.py", title="Home"),
+                st.Page("mpages\\2_Twitter.py", title="TwitterBot Integration"),
+            ],
+            "Admin" : [
+                st.Page("mpages\\3_Admin.py", title="App Logs"),
+            ],
+        }
+
+        pg = st.navigation(pages)
+
+        pg.run()
+
+    else:
+        st.error("Service is down. Please try again later.")
+        st.markdown("""
+            <style>
+            .loader {
+                border: 16px solid #f3f3f3;
+                border-radius: 50%;
+                border-top: 16px solid #3498db;
+                width: 120px;
+                height: 120px;
+                -webkit-animation: spin 2s linear infinite; /* Safari */
+                animation: spin 2s linear infinite;
+            }
+
+            /* Safari */
+            @-webkit-keyframes spin {
+                0% { -webkit-transform: rotate(0deg); }
+                100% { -webkit-transform: rotate(360deg); }
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            </style>
+            <div class="loader"></div>
+            """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
