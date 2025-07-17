@@ -1,0 +1,179 @@
+site_name: GacetaChat Documentation
+site_description: AI-powered document processing platform for Costa Rica's official gazette
+site_author: GacetaChat Team
+site_url: https://gacetachat.github.io/docs/
+
+# Repository
+repo_name: gacetachat/gacetachat
+repo_url: https://github.com/gacetachat/gacetachat
+
+# Copyright
+copyright: Copyright &copy; 2025 GacetaChat Team
+
+# Theme configuration
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: blue
+      accent: pink
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: blue
+      accent: pink
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes
+    - navigation.top
+    - search.highlight
+    - search.share
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.tooltips
+    - announce.dismiss
+
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/robot
+
+# Plugins
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - minify:
+      minify_html: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+
+# Markdown extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: gacetachat
+      repo: gacetachat
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Extra CSS and JS
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+# Social links
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/gacetachat/gacetachat
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/gacetachat
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/company/gacetachat
+  version:
+    provider: mike
+
+# Navigation
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Overview: getting-started/overview.md
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+    - Configuration: getting-started/configuration.md
+  - Architecture:
+    - System Overview: architecture/system-overview.md
+    - Components: architecture/components.md
+    - Data Flow: architecture/data-flow.md
+    - Security: architecture/security.md
+    - Deployment: architecture/deployment.md
+  - Development:
+    - Standards: development/standards.md
+    - Setup: development/setup.md
+    - Testing: development/testing.md
+    - Contributing: development/contributing.md
+    - API Reference: development/api-reference.md
+  - Business:
+    - Market Analysis: business/market-analysis.md
+    - Business Plan: business/business-plan.md
+    - Business Models: business/business-models.md
+    - Go-to-Market: business/go-to-market.md
+    - Monetization Strategy: business/monetization-strategy.md
+    - Pricing Strategy: business/pricing-strategy.md
+    - Lead Generation: business/lead-generation.md
+    - Accountability Framework: business/accountability-framework.md
+    - Competition: business/competition.md
+  - Operations:
+    - Pain Points: operations/pain-points.md
+    - Monitoring: operations/monitoring.md
+    - Troubleshooting: operations/troubleshooting.md
+    - Performance: operations/performance.md
+    - Scaling: operations/scaling.md
+  - Guides:
+    - Demo Guide: guides/demo-guide.md
+    - User Guide: guides/user-guide.md
+    - Admin Guide: guides/admin-guide.md
+    - Integration Guide: guides/integration-guide.md
+  - UI/UX:
+    - Improvement Plan: ui-ux/improvement-plan.md
+    - Requirements Comparison: ui-ux/requirements-comparison.md
+    - Streamlit Standards: ui-ux/streamlit-standards.md
+    - ASCII Mockup Standards: ui-ux/ascii-mockup-standards.md
+    - ASCII Problems Analysis: ui-ux/ascii-problems-analysis.md
+    - Enhanced Problems Analysis: ui-ux/enhanced-problems-analysis.md
+    - ASCII Solutions Visualization: ui-ux/ascii-solutions-visualization.md
+  - Reference:
+    - Lessons Learned: reference/lessons-learned.md
+    - FAQ: reference/faq.md
+    - Glossary: reference/glossary.md
+    - Changelog: reference/changelog.md
