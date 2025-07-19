@@ -195,7 +195,7 @@ PDF Processing:
 
 ### 4. Enhanced Technical Requirements
 
-#### Performance Requirements
+#### Performance Requirements (FOR THE FUTURE)
 ```yaml
 Performance Targets:
   Load Times:
@@ -240,7 +240,7 @@ Security Measures:
     - Audit logging
 ```
 
-### 5. Enhanced Accessibility Requirements
+### 5. Enhanced Accessibility Requirements (FOR THE FUTURE)
 
 #### WCAG 2.1 AA Compliance
 ```yaml
@@ -270,7 +270,7 @@ Accessibility Standards:
     - Error prevention and correction
 ```
 
-### 6. Enhanced Mobile Requirements
+### 6. Enhanced Mobile Requirements 
 
 #### Mobile-First Design
 ```yaml

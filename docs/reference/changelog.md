@@ -450,7 +450,7 @@ When reporting issues, please include:
 - Error messages or screenshots
 
 ### Contributing
-We welcome contributions! Please see our [Contributing Guide](contributing.md) for details on how to submit pull requests, report issues, and contribute to the project.
+We welcome contributions! Please see our [Contributing Guide](../development/contributing.md) for details on how to submit pull requests, report issues, and contribute to the project.
 
 ---
 

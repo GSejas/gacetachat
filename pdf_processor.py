@@ -1,19 +1,20 @@
 # pdf_processor.py
-import os
 from langchain_community.document_loaders import PyPDFLoader
-from models import GacetaPDF
+
 from db import Session
 from faiss_helper import FAISSHelper
+from models import GacetaPDF
+
 
 class PDFProcessor:
-    def __init__(self, faiss_helper:FAISSHelper):
+    def __init__(self, faiss_helper: FAISSHelper):
         self.faiss_helper = faiss_helper
 
     def process_latest_pdf(self):
         session = Session()
         latest_gaceta = session.query(GacetaPDF).order_by(GacetaPDF.date.desc()).first()
         if latest_gaceta:
-            
+
             import os
 
             file_path = latest_gaceta.file_path
@@ -23,7 +24,7 @@ class PDFProcessor:
                 print(f"File exists at: {absolute_path}")
             else:
                 print(f"File does not exist at: {absolute_path}")
-            
+
             loader = PyPDFLoader(absolute_path)
             documents = loader.load()
             db = self.faiss_helper.create_faiss_index(documents)
@@ -33,4 +34,3 @@ class PDFProcessor:
             return db, documents
         session.close()
         return None, None
-

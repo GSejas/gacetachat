@@ -35,24 +35,12 @@ graph TB
 ```
 
 ## 🎯 Design Principles
-
-### 1. **Separation of Concerns**
-- **Frontend**: User interface and experience
-- **Backend**: Business logic and API
-- **Processor**: Document processing and AI analysis
-- **Database**: Data persistence and state management
-
-### 2. **Event-Driven Architecture**
-- **Document Processing**: Triggered by schedule or manual request
-- **AI Analysis**: Executed on document availability
-- **User Interactions**: Real-time chat processing
-- **Social Media**: Automated posting based on content analysis
-
-### 3. **Scalability Considerations**
-- **Horizontal Scaling**: Multiple instances via PM2
-- **Vertical Scaling**: Resource allocation per service
-- **Caching**: Redis for frequently accessed data
-- **Load Distribution**: Nginx reverse proxy
+| **Separation of Concerns** | **Event-Driven Architecture** | **Scalability Considerations** |
+|----------------------------|-------------------------------|-------------------------------|
+| **Frontend**: User interface and experience | **Document Processing**: Triggered by schedule or manual request | **Horizontal Scaling**: Multiple instances via PM2 |
+| **Backend**: Business logic and API | **AI Analysis**: Executed on document availability | **Vertical Scaling**: Resource allocation per service |
+| **Processor**: Document processing and AI analysis | **User Interactions**: Real-time chat processing | **Caching**: Redis for frequently accessed data |
+| **Database**: Data persistence and state management | **Social Media**: Automated posting based on content analysis | **Load Distribution**: Nginx reverse proxy |
 
 ## 🔧 Component Architecture
 

@@ -1,36 +1,27 @@
 # from services.counter import check_global_limit, increment_global_query_count
-from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy.orm import Session
-from datetime import date, datetime, timedelta
-from pytz import timezone
-from db import get_db
-from models import ExecutionSession, ExecutionState, ContentTemplate, ContentExecutionLog, Prompt, PromptQueryResponse, GacetaPDF
-
-from models import *
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from db import get_db
+from datetime import datetime
 from typing import List
-from models import Prompt
-from logging_setup import setup_logging
-from config import config
-from services.counter import increment_global_query_count, check_global_limit
+
 import tweepy
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session
+
+from db import get_db
+from logging_setup import setup_logging
+from models import *
+from models import GacetaPDF
+from services.counter import check_global_limit, increment_global_query_count
 
 setup_logging()
 
-import streamlit_antd_components as sac
 
-import streamlit as st
-from datetime import datetime, timedelta
-from models import *
-from db import get_db
-from langchain_openai import OpenAIEmbeddings
-from pytz import timezone
-from dotenv import load_dotenv
 import os
+from datetime import datetime
 
 from fastapi.middleware.cors import CORSMiddleware
+
+from db import get_db
+from models import *
 
 app = FastAPI()
 
@@ -42,19 +33,19 @@ twitter_api_secret_key = os.getenv("TWITTER_API_secret_key")
 twitter_consumer_api_key = os.environ.get("TWITTER_CONSUMER_API_KEY")
 twitter_consumer_api_secret_key = os.environ.get("TWITTER_CONSUMER_API_secret_key")
 
-callback_url = 'https://c470-186-176-232-195.ngrok-free.app/twitter/callback'
+callback_url = "https://c470-186-176-232-195.ngrok-free.app/twitter/callback"
 
-from dotenv import load_dotenv
 API_KEY = os.environ.get("APP_SECRET_API_KEY")
 
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from crud import *
 from datetime import datetime
 from typing import List
-from fastapi import FastAPI, HTTPException, Request, Depends
+
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
+
+from crud import *
 
 # CORS settings for local development
 app.add_middleware(
@@ -77,24 +68,27 @@ async def api_key_middleware(request: Request, call_next):
     return response
 
 
-
 @app.get("/execution_session_by_date/")
 async def get_execution_session(date: str, db: Session = Depends(get_db)):
     try:
-        date_obj = datetime.strptime(date, '%Y-%m-%d')
+        date_obj = datetime.strptime(date, "%Y-%m-%d")
         exec_sessions = get_execution_session_by_date(db, date_obj)
         if exec_sessions:
             return exec_sessions
         else:
-            raise HTTPException(status_code=404, detail="Execution session not found for the given date")
+            raise HTTPException(
+                status_code=404, detail="Execution session not found for the given date"
+            )
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date format, should be YYYY-MM-DD")
+        raise HTTPException(
+            status_code=400, detail="Invalid date format, should be YYYY-MM-DD"
+        )
+
 
 @app.get("/execution_session/available/")
 async def list_available_index_days_api(db: Session = Depends(get_db)):
     days = list_available_index_days(db)
     return [day[0] for day in days]
-
 
 
 @app.get("/execution_session/", response_model=List[dict])
@@ -103,12 +97,14 @@ async def execution_session_api(session_id: str, db: Session = Depends(get_db)):
     return logs
 
 
-from sqlalchemy.orm import Session
-from sqlalchemy import and_, desc, asc
+from datetime import datetime
+from typing import List, Optional
+
 # from . import models, schemas
 from pydantic import BaseModel
-from datetime import datetime
-from typing import Optional, List
+from sqlalchemy import and_, asc, desc
+from sqlalchemy.orm import Session
+
 
 class LogQueryParams(BaseModel):
     limit: Optional[int] = 10
@@ -116,6 +112,7 @@ class LogQueryParams(BaseModel):
     order: Optional[str] = "desc"
     prompt_text: Optional[str] = None
     state: Optional[str] = None
+
 
 class LogResponseSchema(BaseModel):
     id: str
@@ -133,10 +130,16 @@ class LogResponseSchema(BaseModel):
     class Config:
         orm_mode = True
 
+
 import models
 
+
 def get_content_logs(db: Session, params: LogQueryParams):
-    query = db.query(models.ContentExecutionLog).join(models.Prompt).add_entity(models.Prompt)
+    query = (
+        db.query(models.ContentExecutionLog)
+        .join(models.Prompt)
+        .add_entity(models.Prompt)
+    )
 
     if params.prompt_text:
         query = query.filter(models.Prompt.prompt_text.contains(params.prompt_text))
@@ -150,7 +153,7 @@ def get_content_logs(db: Session, params: LogQueryParams):
         query = query.order_by(desc(models.ContentExecutionLog.created_at))
 
     query = query.offset(params.offset).limit(params.limit)
-    
+
     logs = query.all()
 
     # Transform the result to match the response schema
@@ -166,13 +169,12 @@ def get_content_logs(db: Session, params: LogQueryParams):
             query_response_id=log.query_response_id,
             template_id=log.template_id,
             prompt_text=prompt.prompt_text,
-            response=log.output.response if log.query_response_id  else None,
-            sources=log.output.sources if log.query_response_id  else None
+            response=log.output.response if log.query_response_id else None,
+            sources=log.output.sources if log.query_response_id else None,
         )
         log_responses.append(log_response)
-    
-    return log_responses
 
+    return log_responses
 
 
 @app.get("/content_logs/", response_model=List[LogResponseSchema])
@@ -182,24 +184,21 @@ async def get_content_logs_api(
     order: str = "desc",
     prompt_text: Optional[str] = None,
     state: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     params = LogQueryParams(
-        limit=limit,
-        offset=offset,
-        order=order,
-        prompt_text=prompt_text,
-        state=state
+        limit=limit, offset=offset, order=order, prompt_text=prompt_text, state=state
     )
     return get_content_logs(db, params)
 
 
 @app.get("/check_global_limit/")
 async def check_global_limit_api(db: Session = Depends(get_db)):
-    if check_global_limit(db):  
+    if check_global_limit(db):
         return {"allowed": True}
     else:
         return {"allowed": False}
+
 
 @app.post("/increment_global_query_count/")
 async def increment_global_query_count_api(db: Session = Depends(get_db)):
@@ -209,6 +208,7 @@ async def increment_global_query_count_api(db: Session = Depends(get_db)):
     else:
         raise HTTPException(status_code=429, detail="Global query limit reached")
 
+
 from fastapi.responses import RedirectResponse
 
 twitter_scope = ["tweet.read", "tweet.write", "users.read", "offline.access"]
@@ -216,20 +216,26 @@ twitter_scope = ["tweet.read", "tweet.write", "users.read", "offline.access"]
 # In-memory storage for code verifiers
 code_verifiers = {}
 
-from oauth_helpers import generate_code_challenge, generate_code_verifier
-
 from redis import Redis
 
+from oauth_helpers import generate_code_challenge, generate_code_verifier
+
 redis_client = Redis(
-    host="165.227.177.167", port=6379, db=0, password='foofoojaaa', decode_responses=True
+    host="165.227.177.167",
+    port=6379,
+    db=0,
+    password="foofoojaaa",
+    decode_responses=True,
 )
 
 
 def get_refreshed_access_token():
     refresh_token = redis_client.get("refresh_token")
     if not refresh_token:
-        raise HTTPException(status_code=400, detail="Refresh token not found or expired")
-    
+        raise HTTPException(
+            status_code=400, detail="Refresh token not found or expired"
+        )
+
     auth = tweepy.OAuth2UserHandler(
         client_id=twitter_api_key,
         redirect_uri=callback_url,
@@ -247,14 +253,15 @@ def get_refreshed_access_token():
         redis_client.set("access_token", access_token, ex=3600)  # Expire after 1 hour
         return access_token
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error! Failed to refresh access token: {e}")
-
+        raise HTTPException(
+            status_code=500, detail=f"Error! Failed to refresh access token: {e}"
+        )
 
 
 @app.get("/twitter/login")
 async def login():
     code_verifier = generate_code_verifier()
-    code_challenge = generate_code_challenge(code_verifier)
+    generate_code_challenge(code_verifier)
     auth = tweepy.OAuth2UserHandler(
         client_id=twitter_api_key,
         redirect_uri=callback_url,
@@ -263,14 +270,17 @@ async def login():
         # code_challenge=code_challenge,
         # code_challenge_method='S256'
     )
-    
+
     try:
         redirect_url = auth.get_authorization_url()
-        code_verifiers[auth._state ] = auth
+        code_verifiers[auth._state] = auth
         print(f"state: {auth._state}")
         return RedirectResponse(f"{redirect_url}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error! Failed to get authorization URL: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Error! Failed to get authorization URL: {e}"
+        )
+
 
 @app.get("/twitter/callback")
 # async def callback(request: Request):
@@ -278,7 +288,7 @@ async def callback(state: str, code: str):
     # state = request.get('state')
     # code = request.get('code')
     code_verifier = code_verifiers.pop(state, None)
-    
+
     # if not code_verifier:
     #     raise HTTPException(status_code=400, detail="Invalid state parameter")
 
@@ -295,18 +305,24 @@ async def callback(state: str, code: str):
         )
         # refresh_token = access_token['refresh_token']
         # Store access token and refresh token in Redis
-        redis_client.set("access_token", access_token['access_token'], ex=3600)  # Expire after 1 hour
-        redis_client.set("refresh_token", access_token['refresh_token'])  # No expiry for refresh token
+        redis_client.set(
+            "access_token", access_token["access_token"], ex=3600
+        )  # Expire after 1 hour
+        redis_client.set(
+            "refresh_token", access_token["refresh_token"]
+        )  # No expiry for refresh token
         return {"access_token": access_token}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error! Failed to fetch access token: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Error! Failed to fetch access token: {e}"
+        )
 
 
 def post_tweet(tweet_text: str):
     """
     The function `post_tweet` posts a tweet using Tweepy library after obtaining or refreshing the
     access token.
-    
+
     :param tweet_text: The `post_tweet` function takes a `tweet_text` parameter, which is a string
     representing the text of the tweet that you want to post on Twitter. This function first retrieves
     an access token from a Redis client. If the access token is not available, it calls the
@@ -337,27 +353,35 @@ async def post_tweet_api(tweet_text: str):
 
 
 from datetime import date as date_type
+
+
 @app.get("/gacetas")
-async def get_gacetas_api(db: Session = Depends(get_db), date: Optional[date_type] = None, order: Optional[str] = "desc"):
+async def get_gacetas_api(
+    db: Session = Depends(get_db),
+    date: Optional[date_type] = None,
+    order: Optional[str] = "desc",
+):
     try:
         query = db.query(GacetaPDF)
         if date:
             start_date = datetime.combine(date, datetime.min.time())
             end_date = datetime.combine(date, datetime.max.time())
-            query = query.filter(and_(GacetaPDF.date >= start_date, GacetaPDF.date <= end_date))
-        
+            query = query.filter(
+                and_(GacetaPDF.date >= start_date, GacetaPDF.date <= end_date)
+            )
+
         if order == "asc":
             query = query.order_by(asc(GacetaPDF.date))
         else:
             query = query.order_by(desc(GacetaPDF.date))
-        
+
         gacetas = query.all()
 
         res = {
             "gacetas": [
                 {
                     "gaceta": gaceta.to_json(),
-                    "twitter_prompts": get_twitter_prompts(db, gaceta.id, 1)
+                    "twitter_prompts": get_twitter_prompts(db, gaceta.id, 1),
                 }
                 for gaceta in gacetas
             ]
@@ -367,14 +391,16 @@ async def get_gacetas_api(db: Session = Depends(get_db), date: Optional[date_typ
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
-        
-        
+
+
 from pydantic import BaseModel
+
 
 class ApproveTweetRequest(BaseModel):
     gaceta_id: int
     tweet_text: str
     content_exec_id: str
+
 
 @app.post("/approve_tweet")
 async def approve_tweet(request: ApproveTweetRequest):
@@ -392,9 +418,6 @@ async def approve_tweet(request: ApproveTweetRequest):
         raise HTTPException(status_code=500, detail=f"Error posting tweet: {e}")
 
 
-
-
-
 @app.get("/health_check")
 def health_check():
     try:
@@ -405,4 +428,5 @@ def health_check():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="127.0.0.1", port=8050)

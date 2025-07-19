@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+
 from db import get_db
 from models import ContentTemplate, Prompt
 
@@ -89,6 +90,7 @@ Contact Information: Email (aideationcr@gmail.com), phone number (+506 8510-0213
 Unsubscribe Option: A link for readers to unsubscribe if they choose to. Subscribe link is [APP_URL_BASE]/unsubscribe
 """
 
+
 def create_preset_data(db: Session):
     # Check if the preset content template already exists
     existing_template = db.query(ContentTemplate).filter_by(id=1).first()
@@ -99,7 +101,7 @@ def create_preset_data(db: Session):
     content_template = ContentTemplate(
         id=1,
         title="Daily Preset Prompts",
-        description="Preset prompts to be executed on a daily basis."
+        description="Preset prompts to be executed on a daily basis.",
     )
     db.add(content_template)
     db.commit()
@@ -113,7 +115,7 @@ def create_preset_data(db: Session):
             "text": twitter_prompt,
             "alias": "twitter_summary",
             "scheduled_execution": True,
-            "doc_aware": True
+            "doc_aware": True,
         },
         {
             "name": "Headline Prompt",
@@ -121,7 +123,7 @@ def create_preset_data(db: Session):
             "text": "What are the top news headlines in today's Gaceta? For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
             "alias": "headline_summary",
             "scheduled_execution": True,
-            "doc_aware": True
+            "doc_aware": True,
         },
         {
             "name": "Economic Updates Prompt",
@@ -129,7 +131,7 @@ def create_preset_data(db: Session):
             "text": "Summarize the economic updates in today's Gaceta. For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
             "alias": "economic_updates",
             "scheduled_execution": True,
-            "doc_aware": True
+            "doc_aware": True,
         },
         {
             "name": "Legal Changes Prompt",
@@ -137,7 +139,7 @@ def create_preset_data(db: Session):
             "text": "What legal changes are mentioned in today's Gaceta? For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
             "alias": "legal_changes",
             "scheduled_execution": True,
-            "doc_aware": True
+            "doc_aware": True,
         },
         {
             "name": "Environmental News Prompt",
@@ -145,7 +147,7 @@ def create_preset_data(db: Session):
             "text": "What environmental news is covered in today's Gaceta? For each headline, end the paragraph witha reference to the page (i.e Pg 345, )",
             "alias": "environmental_news",
             "scheduled_execution": True,
-            "doc_aware": True
+            "doc_aware": True,
         },
         {
             "name": "Newsletter Prompt",
@@ -153,8 +155,8 @@ def create_preset_data(db: Session):
             "text": newsletter_prompt,
             "alias": "newsletter",
             "scheduled_execution": False,
-            "doc_aware": False
-        }
+            "doc_aware": False,
+        },
     ]
     for prompt_data in prompts:
         prompt = Prompt(
@@ -164,10 +166,11 @@ def create_preset_data(db: Session):
             short_description=prompt_data["description"],
             alias=prompt_data["alias"],
             scheduled_execution=prompt_data["scheduled_execution"],
-            doc_aware=prompt_data["doc_aware"]
+            doc_aware=prompt_data["doc_aware"],
         )
         db.add(prompt)
     db.commit()
+
 
 # Run the function to create preset data
 db_session = next(get_db())

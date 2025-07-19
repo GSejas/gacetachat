@@ -88,19 +88,19 @@ graph TB
 ## 🎯 Quick Navigation
 
 ### For Developers
-1. Start with [DEVELOPMENT.md](./DEVELOPMENT.md) for coding standards
-2. Review [ARCHITECTURE.md](./ARCHITECTURE.md) for system design
-3. Check [PAIN_POINTS.md](./PAIN_POINTS.md) for known issues
+1. Start with [Development Standards](development/standards.md) for coding standards
+2. Review [System Architecture](architecture/system-overview.md) for system design
+3. Check [Pain Points](operations/pain-points.md) for known issues
 
 ### For Business Stakeholders
-1. Begin with [README.md](../README.md) for project overview
-2. Explore [COMMERCIALIZATION.md](./COMMERCIALIZATION.md) for business opportunities
-3. Use [DEMO_GUIDE.md](./DEMO_GUIDE.md) for presentations
+1. Begin with [Market Analysis](business/market-analysis.md) for project overview
+2. Explore [Business Models](business/business-models.md) for business opportunities
+3. Use [Demo Guide](guides/demo-guide.md) for presentations
 
 ### For Project Managers
-1. Review [LESSONS_LEARNED.md](./LESSONS_LEARNED.md) for project insights
-2. Study [PAIN_POINTS.md](./PAIN_POINTS.md) for prioritization
-3. Reference [COMMERCIALIZATION.md](./COMMERCIALIZATION.md) for roadmap
+1. Review [Lessons Learned](reference/lessons-learned.md) for project insights
+2. Study [Pain Points](operations/pain-points.md) for prioritization
+3. Reference [Business Models](business/business-models.md) for roadmap
 
 ## 📚 Document Summaries
 

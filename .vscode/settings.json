@@ -3,5 +3,11 @@
         "."
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    // Always open Markdown files in preview mode
+    "workbench.editorAssociations": {
+        "*.md": "vscode.markdown.preview.editor"
+    },
+    // Optional: open markdown links in preview
+    "markdown.preview.openMarkdownLinks": "inPreview"
 }

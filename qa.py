@@ -1,11 +1,11 @@
 from typing import List
-from typing import List
-from langchain.chains.combine_documents.stuff import StuffDocumentsChain
-from langchain.docstore.document import Document
 
-from langchain_openai import ChatOpenAI
+from langchain.chains.combine_documents.stuff import StuffDocumentsChain
+
 # from knowledge_gpt.core.debug import FakeChatModel
 from langchain.chat_models.base import BaseChatModel
+from langchain.docstore.document import Document
+from langchain_openai import ChatOpenAI
 
 
 def pop_docs_upto_limit(
@@ -25,13 +25,14 @@ def pop_docs_upto_limit(
 
 def get_llm(model: str, **kwargs) -> BaseChatModel:
     if model == "debug":
-        return None# FakeChatModel()
+        return None  # FakeChatModel()
 
     if "gpt" in model:
         return ChatOpenAI(model=model, **kwargs)  # type: ignore
 
     raise NotImplementedError(f"Model {model} not supported!")
-from langchain.chains.qa_with_sources import load_qa_with_sources_chain
+
+
 from langchain.prompts import PromptTemplate
 
 ## Use a shorter template to reduce the number of tokens in the prompt
@@ -55,10 +56,12 @@ FINAL ANSWER:"""
 STUFF_PROMPT = PromptTemplate(
     template=template, input_variables=["context", "question"]
 )
+from langchain.chat_models.base import BaseChatModel
 from langchain.docstore.document import Document
+
 # from knowledge_gpt.core.embedding import FolderIndex
 from pydantic import BaseModel
-from langchain.chat_models.base import BaseChatModel
+
 # <!-- ruff: noqa: F821 -->
 # from langchain.globals import set_llm_cache
 
@@ -67,18 +70,20 @@ class AnswerWithSources(BaseModel):
     answer: str
     sources: List[Document]
 
+
 from langchain.chains.combine_documents import create_stuff_documents_chain
 
 # from langchain.cache import InMemoryCache
 
+
 # set_llm_cache(InMemoryCache())
 def query_folder(
-        query: str,
-        folder_index,
-        llm: BaseChatModel,
-        return_all: bool = False,
-        debug: bool = True,
-    ):
+    query: str,
+    folder_index,
+    llm: BaseChatModel,
+    return_all: bool = False,
+    debug: bool = True,
+):
     """Queries a folder index for an answer.
 
     Args:
@@ -103,18 +108,18 @@ def query_folder(
     relevant_docs = folder_index.similarity_search(query, k=5)
 
     partial_prompt = STUFF_PROMPT.partial(context=relevant_docs, question=query)
-    
+
     chain = create_stuff_documents_chain(llm, STUFF_PROMPT)
-    
-    result = chain.invoke({"context": relevant_docs,  "question":query})
+
+    result = chain.invoke({"context": relevant_docs, "question": query})
 
     sources = relevant_docs
 
     answer = result.split("SOURCES:")[0]
 
     return {
-            "answer":answer,
-            "partial":partial_prompt,
-            "sources":sources,
-            "ai_references":result.split("SOURCES:")[1],
-            }
+        "answer": answer,
+        "partial": partial_prompt,
+        "sources": sources,
+        "ai_references": result.split("SOURCES:")[1],
+    }

@@ -59,6 +59,7 @@ plugins:
       minify_html: true
   - git-revision-date-localized:
       enable_creation_date: true
+      enable_git_follow: false
 
 # Markdown extensions
 markdown_extensions:
@@ -140,7 +141,9 @@ nav:
   - Development:
     - Standards: development/standards.md
     - Setup: development/setup.md
+    - Development Guide: development/guide.md
     - Testing: development/testing.md
+    - Tox Migration Guide: development/tox-migration-guide.md
     - Contributing: development/contributing.md
     - API Reference: development/api-reference.md
   - Business:
@@ -164,6 +167,8 @@ nav:
     - User Guide: guides/user-guide.md
     - Admin Guide: guides/admin-guide.md
     - Integration Guide: guides/integration-guide.md
+    - Advanced Configuration: guides/advanced-configuration.md
+    - Deployment Guide: guides/deployment-guide.md
   - UI/UX:
     - Improvement Plan: ui-ux/improvement-plan.md
     - Requirements Comparison: ui-ux/requirements-comparison.md
@@ -173,7 +178,10 @@ nav:
     - Enhanced Problems Analysis: ui-ux/enhanced-problems-analysis.md
     - ASCII Solutions Visualization: ui-ux/ascii-solutions-visualization.md
   - Reference:
+    - Documentation Issues: reference/documentation-issues-analysis.md
+    - Documentation Build Issues: reference/documentation-build-issues.md
     - Lessons Learned: reference/lessons-learned.md
     - FAQ: reference/faq.md
     - Glossary: reference/glossary.md
     - Changelog: reference/changelog.md
+    - External Documentation: reference/external-documentation.md

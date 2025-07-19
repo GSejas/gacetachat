@@ -1,16 +1,16 @@
 # models.py
-from sqlalchemy import (
-    create_engine, Column, Integer, String, Text, DateTime, JSON, ForeignKey, Boolean, Float
-)
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
-from datetime import datetime
 import enum
 import uuid
+from datetime import datetime
+
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 # pm2 start /home/fastapiuser/gacetachat/venv/bin/python -- '/home/fastapiuser/gacetachat/download_gaceta.py' --name download_gaceta
 
 Base = declarative_base()
+
 
 class User(Base):
     __tablename__ = "users"
@@ -20,6 +20,7 @@ class User(Base):
     language = Column(String, default="en")
     hashed_password = Column(String)
 
+
 class ContentTemplate(Base):
     __tablename__ = "content_templates"
     id = Column(Integer, primary_key=True)
@@ -28,12 +29,12 @@ class ContentTemplate(Base):
 
     # Relationship with PromptTemplate
     prompts = relationship("Prompt", back_populates="content_template")
-    
-    
+
+
 class Prompt(Base):
     __tablename__ = "prompts"
     id = Column(Integer, primary_key=True)
-    template_id = Column(Integer, ForeignKey('content_templates.id'))
+    template_id = Column(Integer, ForeignKey("content_templates.id"))
     prompt_text = Column(Text)
     name = Column(String(255))
     short_description = Column(Text)
@@ -42,7 +43,7 @@ class Prompt(Base):
     doc_aware = Column(Boolean, default=True)  # New field
 
     content_template = relationship("ContentTemplate", back_populates="prompts")
-    
+
     def to_json(self):
         return {
             "id": self.id,
@@ -51,9 +52,10 @@ class Prompt(Base):
             "name": self.name,
             "short_description": self.short_description,
             "alias": self.alias,
-            "scheduled_execution": self.scheduled_execution  # Include in JSON representation
+            "scheduled_execution": self.scheduled_execution,  # Include in JSON representation
         }
-    
+
+
 class ExecutionState(enum.Enum):
     INIT = "INIT"
     EXECUTED = "EXECUTED"
@@ -65,17 +67,19 @@ class ExecutionState(enum.Enum):
 class ExecutionSession(Base):
     __tablename__ = "execution_sessions"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    content_template_id = Column(Integer, ForeignKey('content_templates.id'), nullable=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    content_template_id = Column(
+        Integer, ForeignKey("content_templates.id"), nullable=True
+    )
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     completed_at = Column(DateTime, nullable=True)
     status = Column(String, default=ExecutionState.INIT.value)
-    document_id = Column(String, ForeignKey('gacetas.id'), nullable=True)
+    document_id = Column(String, ForeignKey("gacetas.id"), nullable=True)
 
     content_template = relationship("ContentTemplate")
     user = relationship("User")
     logs = relationship("ContentExecutionLog", back_populates="execution_session")
-    messages  = relationship("ChatMessage", back_populates="chat_session")
+    messages = relationship("ChatMessage", back_populates="chat_session")
     gaceta = relationship("GacetaPDF", back_populates="exec_sess")
     is_approved = Column(Boolean, default=False)
 
@@ -88,9 +92,8 @@ class ExecutionSession(Base):
             "completed_at": self.completed_at,
             "status": self.status,
             "document_id": self.document_id,
-            "is_approved": self.is_approved
+            "is_approved": self.is_approved,
         }
-
 
 
 class ChatMessage(Base):
@@ -106,17 +109,16 @@ class ChatMessage(Base):
 class ContentExecutionLog(Base):
     __tablename__ = "execution_logs"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(Integer, ForeignKey('users.id'))
-    template_id = Column(Integer, ForeignKey('content_templates.id'))
-    prompt_id = Column(Integer, ForeignKey('prompts.id'))
-    query_response_id = Column(String, ForeignKey('query_answers.id'))
-    execution_session_id = Column(String, ForeignKey('execution_sessions.id'))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    template_id = Column(Integer, ForeignKey("content_templates.id"))
+    prompt_id = Column(Integer, ForeignKey("prompts.id"))
+    query_response_id = Column(String, ForeignKey("query_answers.id"))
+    execution_session_id = Column(String, ForeignKey("execution_sessions.id"))
     state = Column(String, default=ExecutionState.INIT.value)
     error_message = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
     # response_text = Column(Text, nullable=True)  # To store the response of the executed prompt
-
 
     user = relationship("User")
     template = relationship("ContentTemplate")
@@ -135,17 +137,17 @@ class ContentExecutionLog(Base):
             "state": self.state,
             "error_message": self.error_message,
             "created_at": self.created_at,
-            "updated_at": self.updated_at
+            "updated_at": self.updated_at,
         }
 
 
 class PromptQueryResponse(Base):
-    __tablename__ = 'query_answers'
+    __tablename__ = "query_answers"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     raw_prompt = Column(Text)
     response = Column(Text, nullable=True)
     sources = Column(Text, nullable=True)
-    prompt_template_id = Column(Text, ForeignKey('prompts.id'), nullable=True)
+    prompt_template_id = Column(Text, ForeignKey("prompts.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
@@ -159,12 +161,12 @@ class PromptQueryResponse(Base):
             "sources": self.sources,
             "prompt_template_id": self.prompt_template_id,
             "created_at": self.created_at,
-            "updated_at": self.updated_at
+            "updated_at": self.updated_at,
         }
 
 
 class GacetaPDF(Base):
-    __tablename__ = 'gacetas'
+    __tablename__ = "gacetas"
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, default=datetime.utcnow)
     file_path = Column(String, nullable=False)
@@ -178,7 +180,9 @@ class GacetaPDF(Base):
             "file_path": self.file_path,
         }
 
-from sqlalchemy import Column, Integer, Date, create_engine
+
+from sqlalchemy import Column, Date, Integer
+
 
 class GlobalQueryCount(Base):
     __tablename__ = "global_query_counts"

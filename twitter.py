@@ -1,7 +1,9 @@
-from requests_oauthlib import OAuth1Session
-import os
 import json
+import os
+
 from dotenv import load_dotenv
+from requests_oauthlib import OAuth1Session
+
 load_dotenv()
 # In your terminal please set your environment variables by running the following lines of code.
 # export 'CONSUMER_KEY'='<your_consumer_key>'
@@ -11,9 +13,10 @@ consumer_key = os.environ.get("TWITTER_CONSUMER_API_KEY")
 consumer_secret = os.environ.get("TWITTER_CONSUMER_API_secret_key")
 
 import tweepy
+
 twitter_api_key = os.getenv("TWITTER_API_KEY")
 twitter_api_secret_key = os.getenv("TWITTER_API_secret_key")
-callback_url = 'https://c470-186-176-232-195.ngrok-free.app/twitter/callback'
+callback_url = "https://c470-186-176-232-195.ngrok-free.app/twitter/callback"
 twitter_scope = ["tweet.read", "tweet.write", "users.read"]
 
 auth = tweepy.OAuth2UserHandler(
@@ -29,9 +32,7 @@ print(auth.get_authorization_url())
 
 authorization_response = input("--> ")
 
-access_token = auth.fetch_token(
-    authorization_response
-)
+access_token = auth.fetch_token(authorization_response)
 
 
 client = tweepy.Client(access_token)
@@ -91,7 +92,9 @@ if 0:
 
     if response.status_code != 201:
         raise Exception(
-            "Request returned an error: {} {}".format(response.status_code, response.text)
+            "Request returned an error: {} {}".format(
+                response.status_code, response.text
+            )
         )
 
     print("Response code: {}".format(response.status_code))

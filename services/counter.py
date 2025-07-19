@@ -1,6 +1,9 @@
-from sqlalchemy.orm import Session
 from datetime import datetime
+
+from sqlalchemy.orm import Session
+
 from models import GlobalQueryCount
+
 
 def get_global_query_count(db: Session):
     today = datetime.now().date()
@@ -11,10 +14,12 @@ def get_global_query_count(db: Session):
         db.commit()
     return query_count
 
+
 def increment_global_query_count(db: Session):
     query_count = get_global_query_count(db)
     query_count.count += 1
     db.commit()
+
 
 def check_global_limit(db: Session):
     query_count = get_global_query_count(db)
