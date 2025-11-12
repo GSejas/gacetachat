@@ -251,7 +251,7 @@ Costa Rica is recognized as one of Latin America's strongest democracies, with r
 
 ### Theory of Change
 
-![](2025-11-12-10-03-13.png)
+![Theory of change diagram](2025-11-12-10-03-13.png)
 
 ---
 

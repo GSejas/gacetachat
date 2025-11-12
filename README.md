@@ -26,6 +26,21 @@ La Gaceta - 15 de enero, 2025
 
 That's it. No chat. No login. No complexity.
 
+### How It Works
+
+```mermaid
+graph LR
+    A[La Gaceta PDF] -->|Scrape Daily| B[Backend]
+    B -->|GPT-4o| C[AI Summary]
+    C -->|Store| D[Database]
+    D -->|API| E[Frontend]
+    E -->|30 seconds| F[Citizens]
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style C fill:#9f9,stroke:#333,stroke-width:2px
+    style F fill:#99f,stroke:#333,stroke-width:2px
+```
+
 ---
 
 ## Status: Complete Rewrite
@@ -46,6 +61,12 @@ This is an **unreleased prototype**. We're doing a complete rewrite with modern 
 - Tech stack decisions
 - Budget breakdown
 - Day 1 setup guide
+
+🤝 **[DOSSIER_ONG.md](DOSSIER_ONG.md)** ← For NGOs & Organizations
+- Executive summary in Spanish
+- Social impact metrics
+- Collaboration opportunities
+- Perfect for grant applications & partnerships
 
 💰 **[docs/GRANT_STRATEGY.md](docs/GRANT_STRATEGY.md)** ← For grant applications
 - Funding strategy
@@ -85,9 +106,55 @@ This is an **unreleased prototype**. We're doing a complete rewrite with modern 
 - **OpenAI GPT-4o** - Summary generation
 - **Cloudflare R2** - PDF storage
 
+### System Architecture
+
+```mermaid
+flowchart TB
+    subgraph External
+        LG[La Gaceta<br/>Official Site]
+        Users[Citizens<br/>Journalists<br/>Businesses]
+    end
+
+    subgraph Frontend["Frontend (Vercel)"]
+        Next[Next.js 14<br/>React + Tailwind]
+    end
+
+    subgraph Backend["Backend (Railway)"]
+        API[FastAPI<br/>REST API]
+        Celery[Celery<br/>Background Jobs]
+        Scraper[PDF Scraper]
+    end
+
+    subgraph Data["Data Layer"]
+        PG[(PostgreSQL<br/>Supabase)]
+        Redis[(Redis<br/>Upstash)]
+        R2[(Cloudflare R2<br/>PDF Storage)]
+    end
+
+    subgraph AI["AI Layer"]
+        GPT[OpenAI GPT-4o<br/>Summary Generation]
+    end
+
+    LG -->|Daily PDF| Scraper
+    Scraper -->|Extract Text| GPT
+    GPT -->|5 Bullet Summary| API
+    API --> PG
+    API --> Redis
+    Scraper -->|Store PDF| R2
+    Next -->|GraphQL/REST| API
+    Users -->|Browse| Next
+    Celery -->|Schedule| Scraper
+
+    style LG fill:#e1f5ff,stroke:#333
+    style GPT fill:#d4edda,stroke:#333
+    style Users fill:#fff3cd,stroke:#333
+    style Next fill:#cfe2ff,stroke:#333
+    style API fill:#f8d7da,stroke:#333
+```
+
 ---
 
-## MVP Features (10 Weeks)
+## MVP Features (4 Weeks - AI-Accelerated)
 
 ### What We're Building
 1. **Daily Summary** - Homepage shows today's gazette in 5 bullet points
@@ -131,7 +198,32 @@ This is an **unreleased prototype**. We're doing a complete rewrite with modern 
 ## See the Demo
 
 ### 🌐 Live Demo (Streamlit Cloud)
-**Coming soon!** Deploy to Streamlit Cloud with one click.
+**[https://gacetachat.streamlit.app/](https://gacetachat.streamlit.app/)** - Try it now!
+
+### 📸 Screenshots
+
+<details>
+<summary>Click to see demo screenshots</summary>
+
+#### Homepage with Daily Summary
+![Homepage](docs/screenshots/homepage.png)
+*Clean, simple interface showing the day's 5-bullet summary*
+
+#### Date Navigation
+![Date Navigation](docs/screenshots/date-navigation.png)
+*Browse through historical summaries with intuitive date picker*
+
+#### Onboarding Experience
+![Onboarding](docs/screenshots/onboarding.png)
+*Clear explanation of what La Gaceta is and why GacetaChat matters*
+
+#### Mobile View
+![Mobile Responsive](docs/screenshots/mobile-view.png)
+*Fully responsive design works on all devices*
+
+</details>
+
+> **Note**: Screenshots coming soon! You can help by capturing them with Playwright or submitting your own.
 
 ### 💻 Run Locally
 
@@ -200,6 +292,52 @@ We're in planning phase. Here's how to help:
 - [ ] 50+ media integrations
 - [ ] Open source community
 - [ ] Replication toolkit for other countries
+
+### Development Timeline
+
+```mermaid
+gantt
+    title GacetaChat MVP Development (4 Weeks - AI-Accelerated)
+    dateFormat YYYY-MM-DD
+    section Backend
+    Database Schema & Models     :a1, 2025-01-01, 3d
+    REST API Endpoints          :a2, after a1, 4d
+    PDF Scraper                 :a3, after a1, 3d
+    GPT-4 Integration          :a4, after a3, 2d
+    Celery Jobs Setup          :a5, after a4, 2d
+
+    section Frontend
+    Next.js Setup              :b1, 2025-01-08, 2d
+    UI Components              :b2, after b1, 4d
+    Homepage & Archive         :b3, after b2, 3d
+    Search Feature             :b4, after b3, 2d
+    API Integration            :b5, after b4, 2d
+
+    section Testing & Launch
+    Integration Testing        :c1, 2025-01-22, 3d
+    Security Audit             :c2, after c1, 2d
+    Performance Optimization   :c3, after c2, 2d
+    Public Launch              :milestone, 2025-01-28, 1d
+```
+
+### User Journey
+
+```mermaid
+journey
+    title Citizen's Morning Routine with GacetaChat
+    section Before GacetaChat
+      Wake up: 3: Citizen
+      Check news: 4: Citizen
+      Miss govt updates: 1: Citizen
+      Feel uninformed: 2: Citizen
+    section With GacetaChat
+      Wake up: 3: Citizen
+      Open gacetachat.cr: 5: Citizen
+      Read 5-bullet summary: 5: Citizen
+      Understand govt actions: 5: Citizen
+      Share with family: 5: Citizen
+      Feel informed: 5: Citizen
+```
 
 ---
 

@@ -6,7 +6,9 @@
       "Bash(awk:*)",
       "Bash(git tag -a v2.0.0-alpha -m \"$(cat <<''EOF''\nGacetaChat v2.0.0-alpha - Complete Rewrite Planning Phase\n\nMajor Changes:\n- Complete architecture rewrite (Next.js + FastAPI + PostgreSQL)\n- V1 prototype archived to archive/v1/\n- Simple Streamlit demo for MVP concept\n- 4-week AI-accelerated development plan with Claude Code Plus\n- Budget optimized to $30k (52% cheaper than traditional)\n- Minimal dependencies (streamlit only for demo)\n- Streamlit Cloud deployment ready\n- Documentation overhaul (single source of truth)\n- 64 bloated docs archived to docs/archive/\n\nFeatures:\n- demo_simple.py with onboarding UX\n- IMPLEMENTATION_PLAN.md (4-week timeline)\n- GRANT_STRATEGY.md ($30k funding plan)\n- CHANGELOG.md (comprehensive project history)\n- .streamlit/config.toml (deployment config)\n- Clean .gitignore and pyproject.toml\n\nTarget: $30k grant funding for 4-week sprint to launch MVP\nEOF\n)\")",
       "Bash(git push:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git remote add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
