@@ -18,6 +18,18 @@ Or: streamlit run demo_simple.py
 
 import streamlit as st
 from datetime import datetime, timedelta
+import json
+from pathlib import Path
+
+# Load demo data
+@st.cache_data
+def load_demo_data():
+    """Load demo summaries from JSON file"""
+    demo_file = Path(__file__).parent / "demo_data.json"
+    if demo_file.exists():
+        with open(demo_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
 
 # Page config
 st.set_page_config(
@@ -25,6 +37,10 @@ st.set_page_config(
     page_icon="📰",
     layout="centered"
 )
+
+# Load data
+demo_data = load_demo_data()
+available_dates = sorted([datetime.strptime(d, "%Y-%m-%d").date() for d in demo_data.keys()], reverse=True)
 
 # Title
 st.title("🇨🇷 GacetaChat")
@@ -52,44 +68,51 @@ with st.expander("📖 ¿Qué es La Gaceta Oficial?", expanded=True):
 st.divider()
 
 # Date selector
+if available_dates:
+    default_date = available_dates[0]
+    min_date = available_dates[-1]
+    max_date = available_dates[0]
+else:
+    default_date = datetime.now().date()
+    min_date = datetime.now().date() - timedelta(days=90)
+    max_date = datetime.now().date()
+
 selected_date = st.date_input(
     "Seleccionar fecha",
-    value=datetime.now().date(),
-    max_value=datetime.now().date(),
-    min_value=datetime.now().date() - timedelta(days=90)
+    value=default_date,
+    max_value=max_date,
+    min_value=min_date,
+    help="Fechas disponibles con datos reales de La Gaceta" if available_dates else "Modo demo"
 )
 
 st.divider()
 
-# Hardcoded demo summary
-st.subheader(f"📋 Resumen - {selected_date.strftime('%d de %B, %Y')}")
+# Get data for selected date
+date_key = selected_date.strftime("%Y-%m-%d")
+day_data = demo_data.get(date_key)
 
-demo_summary = """
-Resumen general de las publicaciones más importantes del día en La Gaceta Oficial de Costa Rica.
-"""
+if day_data:
+    # Real data from demo_data.json
+    st.subheader(f"📋 Resumen - {selected_date.strftime('%d de %B, %Y')}")
+    st.write(day_data["summary"])
 
-st.write(demo_summary)
+    st.markdown("### 📌 Puntos Clave:")
+    for bullet in day_data["bullets"]:
+        st.markdown(f"**{bullet['icon']}** {bullet['text']}")
 
-st.markdown("### 📌 Puntos Clave:")
+    st.divider()
 
-# Bullet points with emojis
-bullets = [
-    ("⚖️", "Nueva regulación sobre permisos sanitarios para establecimientos comerciales. Empresas deben renovar antes del 31 de marzo."),
-    ("💰", "Modificación en tasas de impuestos municipales para el período 2025. Aumento del 3.5% en promedio."),
-    ("🏥", "Actualización de protocolos de salud pública post-pandemia. Incluye nuevas directrices para hospitales."),
-    ("🎓", "Cambios en el calendario escolar para instituciones públicas. Año lectivo inicia el 10 de febrero."),
-    ("🌳", "Nuevas disposiciones para protección de áreas forestales. Prohibiciones adicionales en zonas protegidas.")
-]
+    # Topics
+    st.markdown("### 🏷️ Temas:")
+    st.markdown(" • ".join([f"**{t}**" for t in day_data["topics"]]))
 
-for icon, text in bullets:
-    st.markdown(f"**{icon}** {text}")
-
-st.divider()
-
-# Topics
-st.markdown("### 🏷️ Temas:")
-topics = ["Legal", "Fiscal", "Salud", "Educación", "Ambiente"]
-st.markdown(" • ".join([f"**{t}**" for t in topics]))
+    # Store PDF URL for later use
+    pdf_url = day_data.get("pdf_url", "https://www.imprentanacional.go.cr/gaceta/")
+else:
+    # Fallback for dates without data
+    st.subheader(f"📋 Resumen - {selected_date.strftime('%d de %B, %Y')}")
+    st.info("⏳ No hay datos disponibles para esta fecha en el demo. Selecciona una fecha de julio 2024.")
+    pdf_url = "https://www.imprentanacional.go.cr/gaceta/"
 
 st.divider()
 
@@ -98,6 +121,9 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     if st.button("📄 PDF Original", use_container_width=True):
+        # Check if we have a local PDF
+        if day_data and "pdf_url" in day_data and Path(day_data["pdf_url"]).exists():
+            st.success(f"✅ PDF local disponible: `{day_data['pdf_url']}`")
         st.link_button(
             "Abrir en sitio oficial",
             "https://www.imprentanacional.go.cr/gaceta/",

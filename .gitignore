@@ -21,9 +21,12 @@ archive/v1/
 
 # Data & Logs
 gaceta_pdfs/
+demo_pdfs/
 *.db
 download.log
 *.log
+*.faiss
+*.pkl
 
 # Environment & Secrets
 .env

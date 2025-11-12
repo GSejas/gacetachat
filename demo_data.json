@@ -1,0 +1,245 @@
+{
+  "2024-07-15": {
+    "summary": "Publicaciones importantes en materia legal, fiscal y administrativa.",
+    "bullets": [
+      {
+        "icon": "⚖️",
+        "text": "Reglamento de Ley de Contratación Administrativa. Nuevas disposiciones sobre licitaciones públicas y procedimientos abreviados."
+      },
+      {
+        "icon": "💰",
+        "text": "Tasas municipales actualizadas para San José. Incremento del 2.8% en impuestos de bienes inmuebles."
+      },
+      {
+        "icon": "🏥",
+        "text": "Protocolo sanitario actualizado para establecimientos comerciales. Requisitos de ventilación y aforo."
+      },
+      {
+        "icon": "🎓",
+        "text": "Calendario académico 2025 del MEP. Período lectivo inicia el 10 de febrero con ajustes por días feriados."
+      },
+      {
+        "icon": "🌳",
+        "text": "Declaratoria de áreas protegidas en Guanacaste. Nuevas restricciones de construcción en zonas costeras."
+      }
+    ],
+    "topics": ["Legal", "Fiscal", "Salud", "Educación", "Ambiente"],
+    "pdf_url": "demo_pdfs/2024-07-15/gaceta.pdf"
+  },
+  "2024-07-16": {
+    "summary": "Decretos ejecutivos y regulaciones en diversos sectores.",
+    "bullets": [
+      {
+        "icon": "🚗",
+        "text": "Nuevos requisitos de revisión técnica vehicular. RTV obligatoria cada 2 años para vehículos de menos de 5 años."
+      },
+      {
+        "icon": "💼",
+        "text": "Reforma al Código de Trabajo. Actualización de disposiciones sobre teletrabajo y jornadas flexibles."
+      },
+      {
+        "icon": "🏭",
+        "text": "Regulación ambiental para industrias. Límites más estrictos de emisiones para zonas urbanas."
+      },
+      {
+        "icon": "📊",
+        "text": "Estadísticas del INEC sobre empleo. Tasa de desempleo se reduce al 8.5% en el segundo trimestre."
+      },
+      {
+        "icon": "🏠",
+        "text": "Programa de vivienda social. Apertura de inscripciones para bonos de vivienda en zonas rurales."
+      }
+    ],
+    "topics": ["Transporte", "Laboral", "Ambiente", "Economía", "Vivienda"],
+    "pdf_url": "demo_pdfs/2024-07-16/gaceta.pdf"
+  },
+  "2024-07-18": {
+    "summary": "Avisos legales y actualizaciones normativas importantes.",
+    "bullets": [
+      {
+        "icon": "📜",
+        "text": "Publicación de patentes y marcas registradas. 156 nuevas marcas comerciales inscritas en el Registro Nacional."
+      },
+      {
+        "icon": "⚡",
+        "text": "Tarifas eléctricas actualizadas. ARESEP aprueba ajuste del 1.2% en tarifa residencial."
+      },
+      {
+        "icon": "🚰",
+        "text": "Calidad del agua potable. AyA presenta informe trimestral con 99.2% de cumplimiento de estándares."
+      },
+      {
+        "icon": "🎯",
+        "text": "Convocatoria a concursos públicos. DGSC abre 48 plazas en diversas instituciones del Estado."
+      },
+      {
+        "icon": "📱",
+        "text": "Regulación de telecomunicaciones. SUTEL establece nuevos parámetros de calidad de servicio móvil."
+      }
+    ],
+    "topics": ["Propiedad Intelectual", "Energía", "Servicios Públicos", "Empleo Público", "Telecomunicaciones"],
+    "pdf_url": "demo_pdfs/2024-07-18/gaceta.pdf"
+  },
+  "2024-07-19": {
+    "summary": "Disposiciones administrativas y jurídicas de interés general.",
+    "bullets": [
+      {
+        "icon": "🏦",
+        "text": "Reforma a la Ley Orgánica del Banco Central. Nuevas facultades para regulación de tasas de interés."
+      },
+      {
+        "icon": "🌾",
+        "text": "Apoyo al sector agropecuario. MAG anuncia programa de crédito blando para pequeños productores."
+      },
+      {
+        "icon": "🚌",
+        "text": "Rutas de transporte público actualizadas. CTP autoriza 12 nuevas rutas en la Gran Área Metropolitana."
+      },
+      {
+        "icon": "⚠️",
+        "text": "Alertas de seguridad alimentaria. Ministerio de Salud retira del mercado 3 lotes de productos lácteos."
+      },
+      {
+        "icon": "🎨",
+        "text": "Declaratoria de patrimonio cultural. 5 inmuebles históricos de Cartago protegidos por ley."
+      }
+    ],
+    "topics": ["Financiero", "Agricultura", "Transporte", "Salud Pública", "Cultura"],
+    "pdf_url": "demo_pdfs/2024-07-19/gaceta.pdf"
+  },
+  "2024-07-20": {
+    "summary": "Normativa relevante en materia económica y social.",
+    "bullets": [
+      {
+        "icon": "💵",
+        "text": "Tipo de cambio de referencia. Banco Central establece nueva banda cambiaria para el segundo semestre."
+      },
+      {
+        "icon": "👥",
+        "text": "Seguridad Social actualizada. CCSS ajusta cuotas obrero-patronales con entrada en vigencia en agosto."
+      },
+      {
+        "icon": "📚",
+        "text": "Becas estudiantiles ampliadas. FONABE aumenta cobertura en 5,000 estudiantes de secundaria."
+      },
+      {
+        "icon": "🏗️",
+        "text": "Permisos de construcción. CFIA actualiza requisitos para proyectos de más de 500 m²."
+      },
+      {
+        "icon": "♻️",
+        "text": "Plan Nacional de Reciclaje. Nuevas metas de reducción de residuos sólidos para municipalidades."
+      }
+    ],
+    "topics": ["Economía", "Seguridad Social", "Educación", "Construcción", "Ambiente"],
+    "pdf_url": "demo_pdfs/2024-07-20/gaceta.pdf"
+  },
+  "2024-07-21": {
+    "summary": "Actualizaciones jurídicas y administrativas de múltiples sectores.",
+    "bullets": [
+      {
+        "icon": "🔐",
+        "text": "Ley de Protección de Datos Personales. PRODHAB establece nuevas directrices de cumplimiento para empresas."
+      },
+      {
+        "icon": "🌊",
+        "text": "Concesiones marítimas renovadas. ICT publica lista de 87 concesiones aprobadas en zona costera."
+      },
+      {
+        "icon": "👨‍⚖️",
+        "text": "Nombramientos judiciales. Corte Suprema designa 6 nuevos jueces en circuitos del país."
+      },
+      {
+        "icon": "📡",
+        "text": "Espectro radioeléctrico asignado. SUTEL adjudica frecuencias para expansión de redes 5G."
+      },
+      {
+        "icon": "🎓",
+        "text": "Acreditación universitaria. SINAES renueva acreditación de 15 carreras en universidades públicas."
+      }
+    ],
+    "topics": ["Privacidad", "Turismo", "Judicial", "Tecnología", "Educación Superior"],
+    "pdf_url": "demo_pdfs/2024-07-21/gaceta.pdf"
+  },
+  "2024-07-22": {
+    "summary": "Regulaciones y disposiciones de interés nacional.",
+    "bullets": [
+      {
+        "icon": "🚜",
+        "text": "Precios de sustento agropecuario. CNP fija precios mínimos para arroz, frijol y maíz para la cosecha 2024-2025."
+      },
+      {
+        "icon": "🏥",
+        "text": "Cobertura de servicios de salud ampliada. CCSS habilita 3 nuevos EBAIS en zonas rurales de Limón."
+      },
+      {
+        "icon": "🚦",
+        "text": "Infraestructura vial mejorada. MOPT anuncia inversión de ₡45 mil millones en bacheo nacional."
+      },
+      {
+        "icon": "🎭",
+        "text": "Fondo de Cultura incrementado. Ministerio de Cultura asigna ₡800 millones para proyectos artísticos."
+      },
+      {
+        "icon": "⚖️",
+        "text": "Reformas procesales penales. Asamblea Legislativa aprueba cambios para agilizar juicios."
+      }
+    ],
+    "topics": ["Agricultura", "Salud", "Infraestructura", "Cultura", "Justicia"],
+    "pdf_url": "demo_pdfs/2024-07-22/gaceta.pdf"
+  },
+  "2024-07-23": {
+    "summary": "Publicaciones oficiales en diversos ámbitos de interés público.",
+    "bullets": [
+      {
+        "icon": "🌐",
+        "text": "Tratados internacionales ratificados. Asamblea aprueba convenio de cooperación tecnológica con Corea del Sur."
+      },
+      {
+        "icon": "🏭",
+        "text": "Zonas Francas actualizadas. PROCOMER publica lista de 12 nuevas empresas con régimen de zona franca."
+      },
+      {
+        "icon": "💧",
+        "text": "Conservación de recursos hídricos. MINAE declara áreas de protección de acuíferos en Guanacaste."
+      },
+      {
+        "icon": "🎯",
+        "text": "Metas de carbono neutralidad. Gobierno reafirma compromiso de reducir emisiones en 45% para 2030."
+      },
+      {
+        "icon": "📋",
+        "text": "Simplificación de trámites. MEIC elimina 23 requisitos innecesarios en licencias comerciales."
+      }
+    ],
+    "topics": ["Relaciones Exteriores", "Comercio", "Recursos Naturales", "Cambio Climático", "Trámites"],
+    "pdf_url": "demo_pdfs/2024-07-23/gaceta.pdf"
+  },
+  "2024-07-24": {
+    "summary": "Decretos y avisos legales de relevancia nacional.",
+    "bullets": [
+      {
+        "icon": "🏛️",
+        "text": "Presupuesto extraordinario aprobado. Hacienda asigna ₡120 mil millones adicionales para infraestructura educativa."
+      },
+      {
+        "icon": "🚨",
+        "text": "Seguridad Ciudadana reforzada. MSP despliega 500 nuevos oficiales en zonas de alta criminalidad."
+      },
+      {
+        "icon": "🌱",
+        "text": "Incentivos forestales aumentados. FONAFIFO incrementa pago por servicios ambientales en 18%."
+      },
+      {
+        "icon": "🏥",
+        "text": "Medicamentos genéricos autorizados. Ministerio de Salud aprueba 34 nuevos registros sanitarios."
+      },
+      {
+        "icon": "📊",
+        "text": "Índice de Precios al Consumidor. INEC reporta inflación mensual del 0.3% para junio 2024."
+      }
+    ],
+    "topics": ["Presupuesto", "Seguridad", "Ambiente", "Salud", "Economía"],
+    "pdf_url": "demo_pdfs/2024-07-24/gaceta.pdf"
+  }
+}

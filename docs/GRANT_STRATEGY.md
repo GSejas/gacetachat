@@ -251,21 +251,7 @@ Costa Rica is recognized as one of Latin America's strongest democracies, with r
 
 ### Theory of Change
 
-```
-INPUTS                  ACTIVITIES              OUTPUTS                 OUTCOMES                    IMPACT
-┌──────────┐           ┌──────────┐            ┌──────────┐            ┌──────────┐               ┌──────────┐
-│ Grant    │           │ Build    │            │ Daily    │            │ Citizens │               │ Stronger │
-│ Funding  │──────────▶│ Platform │───────────▶│ Summaries│───────────▶│ Informed │──────────────▶│ Democracy│
-│          │           │          │            │          │            │          │               │          │
-│ Developer│           │ Scrape   │            │ Public   │            │ Media    │               │ Greater  │
-│ Time     │──────────▶│ Gazette  │───────────▶│ API      │───────────▶│ Coverage │──────────────▶│ Trans-   │
-│          │           │          │            │          │            │          │               │ parency  │
-│ Cloud    │           │ Generate │            │ Open     │            │ Research │               │          │
-│ Infra    │──────────▶│ Summaries│───────────▶│ Source   │───────────▶│ Data     │──────────────▶│ Civic    │
-│          │           │          │            │ Code     │            │          │               │ Engage-  │
-└──────────┘           └──────────┘            └──────────┘            └──────────┘               │ ment     │
-                                                                                                    └──────────┘
-```
+![](2025-11-12-10-03-13.png)
 
 ---
 
@@ -384,8 +370,8 @@ Month 3-6: Sustainability
 
 ### Current Team
 
-**[Your Name] - Founder & Lead Developer**
-- Background: [Your experience]
+**Jorge Sequeira - Founder & Lead Developer**
+- Background: Aviation Software, QA Software Architect @ TU
 - Skills: Full-stack development, AI/ML, civic tech
 - Tools: Claude Code Plus for AI-accelerated development
 - Commitment: Full-time for 4-week development sprint
