@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GacetaChat - Resúmenes IA de La Gaceta Oficial</title>
+    <meta name="description" content="Resúmenes diarios de La Gaceta Oficial de Costa Rica generados con inteligencia artificial. Gratis y de código abierto.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1F2937;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            margin: 2rem 0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .feature {
+            padding: 2rem;
+            border-radius: 12px;
+            background: #F9FAFB;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 3rem 0;
+            padding: 2rem;
+            background: #F3F4F6;
+            border-radius: 12px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #6B7280;
+            margin-top: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: white;
+            margin-top: 3rem;
+        }
+
+        .emoji {
+            font-size: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .tagline {
+                font-size: 1.2rem;
+            }
+
+            .main-content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span class="emoji">🇨🇷</span> GacetaChat</h1>
+            <p class="tagline">Resúmenes diarios de La Gaceta Oficial<br>Generados con inteligencia artificial</p>
+            <div class="hero-buttons">
+                <a href="https://github.com/GSejas/gacetachat" class="btn btn-primary">
+                    📖 Ver en GitHub
+                </a>
+                <a href="https://github.com/GSejas/gacetachat#see-the-demo" class="btn btn-secondary">
+                    🚀 Ver Demo
+                </a>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <h2 style="text-align: center; margin-bottom: 2rem;">El Problema</h2>
+            <p style="font-size: 1.2rem; text-align: center; margin-bottom: 3rem; color: #6B7280;">
+                Cada día se publican 50-200 páginas de texto legal denso en La Gaceta Oficial.
+                Nadie tiene tiempo de leerlo, pero contiene información importante para ciudadanos y empresas.
+            </p>
+
+            <h2 style="text-align: center; margin-bottom: 2rem;">Nuestra Solución</h2>
+
+            <div class="features">
+                <div class="feature">
+                    <h3>🤖 Resúmenes IA</h3>
+                    <p>GPT-4 lee La Gaceta cada día y crea un resumen de 5 puntos que puedes leer en 30 segundos.</p>
+                </div>
+
+                <div class="feature">
+                    <h3>📅 Archivo de 90 días</h3>
+                    <p>Accede a resúmenes históricos y busca por palabras clave o temas específicos.</p>
+                </div>
+
+                <div class="feature">
+                    <h3>🆓 Gratis y Abierto</h3>
+                    <p>100% código abierto. API pública gratuita para desarrolladores y organizaciones.</p>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number">$30k</div>
+                    <div class="stat-label">Presupuesto de desarrollo</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">4 semanas</div>
+                    <div class="stat-label">Timeline al MVP</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">$130/mes</div>
+                    <div class="stat-label">Costo de operación</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">3.5M</div>
+                    <div class="stat-label">Costarricenses impactados</div>
+                </div>
+            </div>
+
+            <h2 style="text-align: center; margin: 3rem 0 2rem;">¿Para quién?</h2>
+            <div class="features">
+                <div class="feature">
+                    <h3>👨‍💼 Empresarios</h3>
+                    <p>Mantente al día con regulaciones y cambios que afectan tu negocio.</p>
+                </div>
+
+                <div class="feature">
+                    <h3>📰 Periodistas</h3>
+                    <p>Encuentra noticias y decisiones gubernamentales rápidamente.</p>
+                </div>
+
+                <div class="feature">
+                    <h3>⚖️ Abogados</h3>
+                    <p>Monitorea cambios legales y nuevas disposiciones oficiales.</p>
+                </div>
+
+                <div class="feature">
+                    <h3>🇨🇷 Ciudadanos</h3>
+                    <p>Entiende qué hace tu gobierno de forma clara y accesible.</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: #F3F4F6; border-radius: 12px;">
+                <h2 style="margin-bottom: 1rem;">Estado Actual</h2>
+                <p style="font-size: 1.2rem; color: #6B7280; margin-bottom: 1rem;">
+                    📋 Fase de planificación
+                </p>
+                <p style="margin-bottom: 2rem;">
+                    Buscando financiamiento de $30,000 para construir el MVP en 4 semanas con desarrollo acelerado por IA.
+                </p>
+                <a href="https://github.com/GSejas/gacetachat/blob/master/docs/GRANT_STRATEGY.md"
+                   class="btn btn-primary" style="background: #667eea; color: white;">
+                    💰 Ver Estrategia de Fondos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+            📖 Código abierto | 🇨🇷 Hecho en Costa Rica | ❤️ Para la democracia
+        </p>
+        <p style="opacity: 0.8;">
+            <a href="https://github.com/GSejas/gacetachat" style="color: white; text-decoration: none;">
+                GitHub
+            </a> •
+            <a href="https://github.com/GSejas/gacetachat/blob/master/IMPLEMENTATION_PLAN.md" style="color: white; text-decoration: none;">
+                Plan de Implementación
+            </a> •
+            <a href="https://github.com/GSejas/gacetachat/blob/master/CHANGELOG.md" style="color: white; text-decoration: none;">
+                Changelog
+            </a>
+        </p>
+    </footer>
+</body>
+</html>
