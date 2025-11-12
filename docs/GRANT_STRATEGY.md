@@ -56,8 +56,8 @@
 
 > **Open Data Tool for Democratic Transparency in Costa Rica**
 
-**Target Funding**: $50,000 - $150,000
-**Timeline**: 12-18 months
+**Target Funding**: $30,000 - $35,000
+**Timeline**: 4 weeks to MVP launch (AI-accelerated with Claude Code Plus)
 **Mission**: Make government transparency accessible to every citizen through AI-powered daily summaries
 
 ---
@@ -643,9 +643,9 @@ Rather than compete, we aim to **empower existing players**:
 >
 > **Impact (Year 1)**: 10,000+ monthly users, 50+ media citations, 10+ third-party integrations, 100% open source
 >
-> **Budget**: $70,000 development (one-time) + $20,000/year operations
+> **Budget**: $30,000 development (one-time, AI-accelerated) + $1,560/year operations
 >
-> **Timeline**: 10 weeks to launch, sustainable within 2 years
+> **Timeline**: 4 weeks to launch (AI-accelerated with Claude Code Plus), sustainable within 1 year
 >
 > **Team**: Experienced full-stack developer with civic tech background, supported by academic and legal advisors
 >
@@ -762,7 +762,7 @@ She shares the summary on WhatsApp with her business association. A journalist s
 - Open-source AI implementation
 - Measurable social impact
 
-**Requested Amount**: $50,000 + Google Cloud Credits
+**Requested Amount**: $30,000 + Google Cloud Credits
 
 **Key Messaging**:
 - AI democratizes access to complex information
@@ -783,6 +783,6 @@ She shares the summary on WhatsApp with her business association. A journalist s
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2025-01-15
+**Document Version**: 2.0
+**Last Updated**: 2025-11-12
 **Status**: Ready for Grant Applications
