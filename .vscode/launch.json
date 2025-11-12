@@ -29,6 +29,17 @@
             ]
         },
         {
+            "name": "Python Debugger: Pytest",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${file}"
+            ],
+            "jinja": true,
+            "justMyCode": false
+        },
+        {
             "name": "Pyt Current File",
             "type": "debugpy",
             "request": "launch",

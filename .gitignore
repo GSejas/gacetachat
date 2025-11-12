@@ -15,8 +15,31 @@ build/
 # Virtual environments
 venv/
 env/
-gaceta_pdfs
-gaceta1.db
-.gitignore
-gaceta1.db
+
+# V1 Prototype (archived - don't commit to avoid bloat)
+archive/v1/
+
+# Data & Logs
+gaceta_pdfs/
+*.db
 download.log
+*.log
+
+# Environment & Secrets
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# Testing
+.pytest_cache/
+.tox/
+.coverage
+htmlcov/
+
+# Temporary files
+*.tmp
+*.swp
+*~

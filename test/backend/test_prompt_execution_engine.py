@@ -1,10 +1,70 @@
+#!/usr/bin/env python3
+"""
+Module Name: test_prompt_execution_engine.py
+Description: Unit tests for PromptExecutionEngine class
+
+This module contains comprehensive unit tests for the PromptExecutionEngine
+class, testing all major functionality including prompt execution, session
+management, and database operations.
+
+Key Features:
+- Unit tests with pytest framework
+- Mock objects for external dependencies
+- Database session testing
+- Error condition testing
+
+Usage Example:
+    ```python
+    # Run tests
+    pytest test/backend/test_prompt_execution_engine.py -v
+
+    # Run with coverage
+    pytest test/backend/test_prompt_execution_engine.py --cov=crud
+
+    # Run specific test
+    pytest test/backend/test_prompt_execution_engine.py::test_execute_prompt -v
+    ```
+
+Dependencies:
+    - pytest: Testing framework
+    - unittest.mock: Mocking library for external dependencies
+    - sqlalchemy: Database testing support
+
+Author: GacetaChat Development Team
+Created: 2024-02-01
+Last Modified: 2024-07-18
+Version: 1.0.2
+
+License: MIT License
+Copyright (c) 2024-2025 GacetaChat Team
+
+Notes:
+    - Uses mock database sessions for testing
+    - All external API calls are mocked
+    - Tests cover both success and failure scenarios
+    - Follows pytest conventions and best practices
+
+See Also:
+    - crud.py: Module under test (PromptExecutionEngine)
+    - conftest.py: Test configuration and fixtures
+    - test_integration.py: Integration tests
+"""
+
+# Standard library imports
 from unittest.mock import MagicMock, patch
 
+# Third-party imports
 import pytest
 from sqlalchemy.orm import Session
 
+# Local application imports
 from crud import PromptExecutionEngine
 from models import ContentExecutionLog, ExecutionSession, ExecutionState, Prompt
+
+# Module metadata
+__version__ = "1.0.2"
+__author__ = "GacetaChat Development Team"
+__status__ = "Development"
 
 
 @pytest.fixture

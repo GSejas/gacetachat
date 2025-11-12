@@ -1,0 +1,466 @@
+# GacetaChat - AI-Powered Official Gazette Analysis Platform
+
+## Project Overview
+
+**GacetaChat** is a sophisticated AI-powered platform that automates the processing and analysis of Costa Rica's daily official gazette (La Gaceta). It combines web scraping, semantic search, and GPT-powered AI to provide intelligent summaries, social media automation, and interactive Q&A capabilities for legal professionals, journalists, and citizens.
+
+### Core Capabilities
+- Automated daily PDF scraping and processing
+- FAISS-powered semantic search for accurate information retrieval
+- GPT-4 powered Q&A with document context
+- Social media content generation (Twitter integration)
+- Multi-format content: newsletters, headlines, economic updates, legal changes
+- Interactive web interface with chat capabilities
+
+## Architecture
+
+### 3-Tier System Architecture
+```
+┌─────────────────────────────────────────────────┐
+│        PRESENTATION LAYER                        │
+│  Streamlit Frontend (Port 8512)                 │
+│  - Multi-page UI (Home, Twitter, Admin)         │
+│  - Interactive chat interface                   │
+│  - Document viewer                              │
+└─────────────────────────────────────────────────┘
+                    ↓↑ HTTP/REST
+┌─────────────────────────────────────────────────┐
+│        APPLICATION LAYER                         │
+│  FastAPI Backend (Port 8050)                    │
+│  - REST API endpoints                           │
+│  - Business logic orchestration                 │
+│  - Twitter OAuth integration                    │
+│  - Rate limiting (50 queries/day)               │
+└─────────────────────────────────────────────────┘
+                    ↓↑ SQLAlchemy
+┌─────────────────────────────────────────────────┐
+│        DATA LAYER                                │
+│  SQLite Database + FAISS Vector Indices         │
+│  - Persistent storage                           │
+│  - Vector similarity search                     │
+│  - File system (PDFs organized by date)         │
+└─────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────┐
+│        BACKGROUND SERVICES                       │
+│  Scheduled PDF Scraper (download_gaceta.py)     │
+│  - Daily gazette downloads (9 AM Costa Rica)    │
+│  - FAISS index generation                       │
+│  - Automated AI prompt execution                │
+└─────────────────────────────────────────────────┘
+```
+
+## Technology Stack
+
+### Backend
+- **FastAPI** 0.104.1 - REST API framework
+- **SQLAlchemy** 2.0.23 - Database ORM
+- **Uvicorn** 0.24.0 - ASGI server
+- **Pydantic** 2.5.0 - Data validation
+
+### AI & Machine Learning
+- **OpenAI** 1.3.5 - GPT-4o/GPT-3.5-turbo models
+- **LangChain** 0.0.335 - LLM orchestration framework
+- **FAISS-CPU** 1.7.4 - Vector similarity search (1536-dim embeddings)
+- **OpenAI Embeddings** - text-embedding-ada-002
+
+### PDF Processing & Web Scraping
+- **PyPDF** 3.17.4 - PDF text extraction
+- **BeautifulSoup4** 4.12.2 - HTML parsing
+- **Requests** 2.31.0 - HTTP client
+- **Schedule** 1.2.0 - Task scheduling
+
+### Frontend
+- **Streamlit** 1.28.2 - Interactive web UI
+- **Streamlit-PDF-Viewer** 0.0.13 - PDF display widget
+- **Streamlit-ANTD-Components** 0.3.2 - Enhanced UI components
+
+### Social Media & External Services
+- **Tweepy** 4.14.0 - Twitter API integration
+- **Redis** - OAuth token storage
+
+### Development & Testing
+- **Pytest** 7.4.3 - Testing framework
+- **Black** 23.11.0 - Code formatting
+- **MkDocs** 1.5.3 - Documentation
+
+## Project Structure
+
+```
+gacetachat/
+├── Core Application Files
+│   ├── app.py                      # Legacy Streamlit app (tabbed interface)
+│   ├── streamlit_app.py            # Main Streamlit app (multi-page navigation)
+│   ├── fastapp.py                  # FastAPI REST API backend
+│   ├── startup.py                  # Production deployment orchestration
+│   └── download_gaceta.py          # Background PDF scraper (scheduled)
+│
+├── Core Business Logic
+│   ├── config.py                   # Environment configuration management
+│   ├── models.py                   # SQLAlchemy ORM models
+│   ├── crud.py                     # CRUD operations + PromptExecutionEngine
+│   ├── db.py                       # Database connection & session management
+│   ├── qa.py                       # LangChain Q&A engine
+│   ├── pdf_processor.py            # PDF loading + text extraction
+│   └── faiss_helper.py             # FAISS vector search integration
+│
+├── User Interface (Streamlit Pages)
+│   └── mpages/
+│       ├── 1_Home.py               # Main gazette analysis UI
+│       ├── 2_Twitter.py            # Twitter bot management
+│       └── 3_Admin.py              # Admin logs and monitoring
+│
+├── API Integration
+│   └── stream/
+│       └── api.py                  # Frontend API client for FastAPI
+│
+├── Services
+│   └── services/
+│       └── counter.py              # Global query rate limiting
+│
+├── Testing
+│   ├── test/backend/               # Integration and E2E tests
+│   └── test/smoke/                 # Smoke and performance tests
+│
+├── Data Storage
+│   ├── gaceta_pdfs/                # Downloaded PDFs (organized by date)
+│   │   └── YYYY-MM-DD/
+│   │       ├── gaceta.pdf
+│   │       ├── index.faiss         # Vector search index
+│   │       └── index.pkl           # Index metadata
+│   └── gaceta1.db                  # SQLite database
+│
+└── Documentation
+    └── docs/                       # Development guides and specs
+```
+
+## Key Components
+
+### 1. PDF Processing Pipeline (`download_gaceta.py`)
+- **Scheduled scraping** from imprentanacional.go.cr (Costa Rica's official gazette)
+- **Timezone-aware** scheduling using pytz (America/Costa_Rica)
+- **Automated workflow**: Scrape → Download → Store → Index → Process
+- **FAISS index generation** for semantic search
+- **Database tracking** of all processed documents
+
+### 2. Backend API (`fastapp.py`)
+**Key Endpoints:**
+- `GET /execution_session_by_date/` - Retrieve processing sessions by date
+- `GET /execution_session/available/` - List available gazette dates
+- `GET /content_logs/` - Query execution logs with filtering
+- `POST /approve_tweet` - Twitter integration for social media posting
+- `GET /check_global_limit/` - Rate limiting check
+- `GET /gacetas` - Retrieve gazette records with Twitter prompts
+
+**Features:**
+- API key authentication (X-API-KEY header)
+- Twitter OAuth 2.0 flow with Redis token storage
+- Global rate limiting (50 queries/day)
+- CORS middleware (⚠️ currently allows all origins)
+
+### 3. Frontend UI (`streamlit_app.py`, `mpages/`)
+**Pages:**
+- **Home** - Main gazette analysis interface with chat
+- **Twitter** - Social media automation controls
+- **Admin** - Execution logs and monitoring
+
+**Features:**
+- Date-based gazette browsing
+- Interactive GPT-powered Q&A
+- Session management with chat history
+- Model configuration (GPT-4o, GPT-4o-mini, GPT-3.5-turbo)
+- Temperature and token controls
+
+### 4. Database Models (`models.py`)
+**Core Tables:**
+- `users` - User management (email, hashed passwords)
+- `content_templates` - Prompt template organization
+- `prompts` - AI prompt definitions with scheduling
+- `execution_sessions` - Processing session tracking
+- `content_execution_logs` - Detailed execution logs
+- `query_answers` - AI response storage with sources
+- `gacetas` - Document metadata
+- `chat_messages` - User conversation history
+- `global_query_counts` - Rate limiting counters
+
+**State Machine:** INIT → EXECUTED → APPROVED/FAILED/OUTDATED
+
+### 5. Q&A System (`qa.py`)
+- **LangChain integration** with custom prompt templates
+- **Context-aware answering** using vector search results
+- **Source attribution** for transparency
+- **Token limiting** for cost control
+- **Multi-model support** (GPT-4, GPT-3.5, debug mode)
+
+### 6. Vector Search (`faiss_helper.py`)
+- **OpenAI embeddings** (text-embedding-ada-002, 1536 dimensions)
+- **Document chunking** (1000 characters per chunk, no overlap)
+- **Similarity search** (k=5 nearest neighbors)
+- **Persistent storage** (index.faiss + index.pkl files)
+- ⚠️ **Security Note:** Uses `allow_dangerous_deserialization=True`
+
+### 7. Prompt Execution Engine (`crud.py`)
+- **Template-based prompt execution** with variable substitution
+- **Alias system** - Reference previous prompt results via {{alias}}
+- **Document-aware vs non-document prompts**
+- **Scheduled vs manual execution**
+- **Automatic session and state tracking**
+
+## Data Flow
+
+### Complete Processing Pipeline
+```
+1. INGESTION
+   Schedule (9 AM daily) → Web Scrape → PDF Download → File Save
+
+2. INDEXING
+   PDF Text Extraction → Chunking (1000 chars) → OpenAI Embeddings → FAISS Index
+
+3. AI PROCESSING
+   Create ExecutionSession → Execute Prompts → Alias Substitution → Store Results
+
+4. USER INTERACTION
+   Browse UI → Select Date → View Results → Ask Questions → Vector Search → GPT Response
+```
+
+### Query Processing Flow
+```
+User Query
+    ↓
+FAISS Vector Search (k=5 similar document chunks)
+    ↓
+Token Limiting (manage context window)
+    ↓
+LangChain Prompt Template Assembly
+    ↓
+OpenAI API Call (GPT-4/3.5)
+    ↓
+Parse Response (answer + sources)
+    ↓
+Store in database + Display to user
+```
+
+## Environment Setup
+
+### Required Environment Variables
+```bash
+# Core AI
+OPENAI_API_KEY=sk-xxx           # OpenAI API access (REQUIRED)
+OPENAI_MODEL=gpt-4o             # Model selection
+OPENAI_TEMPERATURE=0.3          # Response randomness (0.0-1.0)
+OPENAI_MAX_TOKENS=2000          # Cost control
+
+# Backend
+APP_SECRET_API_KEY=xxx          # Internal API authentication
+BACKEND_IP=127.0.0.1
+BACKEND_PORT=8050
+
+# Database
+DATABASE_URL=sqlite:///gaceta1.db
+
+# Twitter (Optional)
+TWITTER_API_KEY=xxx
+TWITTER_API_SECRET_KEY=xxx
+TWITTER_CONSUMER_API_KEY=xxx
+TWITTER_CONSUMER_API_SECRET_KEY=xxx
+
+# Application
+TIMEZONE=America/Costa_Rica
+LOG_LEVEL=INFO
+```
+
+### Installation & Setup
+
+1. **Clone and install dependencies:**
+   ```bash
+   git clone https://github.com/GSejas/gacetachat.git
+   cd gacetachat
+   pip install -r requirements.txt
+   ```
+
+2. **Configure environment:**
+   ```bash
+   cp .env.template .env
+   # Edit .env with your API keys
+   ```
+
+3. **Initialize database:**
+   ```bash
+   python -c "from models import *; from db import engine; Base.metadata.create_all(bind=engine)"
+   ```
+
+4. **Run the application:**
+   ```bash
+   # Terminal 1: Backend API
+   uvicorn fastapp:app --host 127.0.0.1 --port 8050
+
+   # Terminal 2: Frontend UI
+   streamlit run streamlit_app.py --server.port 8512
+
+   # Terminal 3: Background scraper
+   python download_gaceta.py
+   ```
+
+   **Or use production orchestrator:**
+   ```bash
+   python startup.py  # Manages all three services
+   ```
+
+## Development Guidelines
+
+### Code Style
+- Comprehensive docstring headers in all Python files
+- Type hints for function signatures
+- Black formatting (line length 88)
+- Clear separation of concerns
+
+### Testing
+```bash
+# Run tests
+pytest test/
+
+# Run specific test suites
+pytest test/backend/test_e2e_gazette_scraper.py
+pytest test/backend/test_prompt_execution_engine.py
+
+# Run with coverage
+pytest --cov=. test/
+```
+
+### Documentation
+- MkDocs for documentation generation
+- Comprehensive inline comments
+- Architecture diagrams in docstrings
+- Security and performance notes
+
+## Security Considerations
+
+### Critical Issues to Address
+⚠️ **HIGH**: CORS allows all origins (`allow_origins=["*"]`)
+⚠️ **HIGH**: FAISS uses `allow_dangerous_deserialization=True`
+⚠️ **HIGH**: Default API key "test-api-key" in config.py
+⚠️ **MEDIUM**: No per-user authentication, only single API key
+⚠️ **MEDIUM**: Redis credentials hardcoded in source code
+⚠️ **LOW**: Rate limiting is global, not per-user
+
+### Recommendations
+1. Implement proper user authentication and authorization
+2. Use secret management service (Vault, AWS Secrets Manager)
+3. Enable HTTPS with SSL certificates
+4. Sanitize all user inputs
+5. Implement per-user rate limiting
+6. Add request signing for FAISS index files
+7. Use environment-specific CORS origins
+
+## Performance Characteristics
+
+### Scalability
+- **SQLite limitation**: Single-writer bottleneck (consider PostgreSQL for production)
+- **FAISS search**: O(n) linear scan, fast for small datasets (<100k documents)
+- **OpenAI API**: Rate-limited by API quotas
+- **No caching layer**: Repeated API calls for same queries
+
+### Cost Control
+- **Max tokens**: 2000 per request (configurable)
+- **Global rate limit**: 50 queries/day
+- **Model selection**: GPT-4o (expensive) vs GPT-3.5-turbo (cheaper)
+- **Temperature**: 0.3 (balanced creativity/cost)
+
+## Common Tasks
+
+### Adding a New Prompt Template
+```python
+# In database or via admin UI
+from models import ContentTemplate, Prompt
+from crud import create_prompt
+
+template = ContentTemplate(
+    title="New Analysis Type",
+    description="What this analysis does"
+)
+
+prompt = Prompt(
+    template_id=template.id,
+    prompt_text="Your GPT prompt here. Use {{alias}} for references.",
+    alias="unique_alias",
+    scheduled_execution=True,
+    doc_aware=True  # Uses FAISS context
+)
+```
+
+### Processing a New Gazette
+```python
+from download_gaceta import download_and_process_gaceta
+
+# Manual trigger (normally runs on schedule)
+download_and_process_gaceta()
+```
+
+### Querying the System
+```python
+from qa import get_answer
+
+answer = get_answer(
+    query="What are the new laws about taxation?",
+    date="2025-01-15",
+    model="gpt-4o",
+    temperature=0.3
+)
+print(answer)  # Includes sources
+```
+
+## Deployment
+
+### Production Checklist
+- [ ] Set secure `APP_SECRET_API_KEY`
+- [ ] Configure proper CORS origins
+- [ ] Set up PostgreSQL instead of SQLite
+- [ ] Enable HTTPS with SSL certificates
+- [ ] Configure Redis with authentication
+- [ ] Set up monitoring and alerting
+- [ ] Configure backup strategy
+- [ ] Set appropriate rate limits
+- [ ] Review and test all security settings
+
+### Docker Deployment
+See [Dockerfile](Dockerfile) and [DEPLOYMENT.md](DEPLOYMENT.md) for containerization instructions.
+
+## Known Issues & Pain Points
+
+See [docs/PAIN_POINTS.md](docs/PAIN_POINTS.md) for detailed analysis of:
+- SQLite single-writer limitations
+- Lack of caching layer
+- Minimal error retry logic
+- Security vulnerabilities
+- Deployment complexity (3 separate processes)
+
+## Useful Resources
+
+- **Official Gazette Source**: https://www.imprentanacional.go.cr/gaceta/
+- **OpenAI API Docs**: https://platform.openai.com/docs
+- **LangChain Docs**: https://python.langchain.com/
+- **FAISS Docs**: https://github.com/facebookresearch/faiss
+- **Streamlit Docs**: https://docs.streamlit.io/
+- **FastAPI Docs**: https://fastapi.tiangolo.com/
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Follow code style guidelines (Black formatting)
+4. Add tests for new features
+5. Update documentation
+6. Commit changes (`git commit -m 'Add amazing feature'`)
+7. Push to branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request
+
+## License
+
+MIT License - See [LICENSE](LICENSE) file for details.
+
+---
+
+**Author**: GacetaChat Team
+**Version**: 2.1.0
+**Last Updated**: 2025-01-15
+**Made with ❤️ in Costa Rica 🇨🇷**

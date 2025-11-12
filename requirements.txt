@@ -1,9 +1,4 @@
-pypdf
-langchain
-langchain-community
-faiss-cpu
-python-dotenv
-langchain-openai
-streamlit-antd-components
-beautifulsoup4
-streamlit-pdf-viewer
+# GacetaChat Demo - Streamlit Cloud Deployment
+# Minimal requirements for the demo only
+
+streamlit>=1.28.2
