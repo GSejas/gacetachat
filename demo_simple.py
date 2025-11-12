@@ -67,7 +67,7 @@ with st.expander("📖 ¿Qué es La Gaceta Oficial?", expanded=True):
 
 st.divider()
 
-# Date selector
+# Date selector with navigation
 if available_dates:
     default_date = available_dates[0]
     min_date = available_dates[-1]
@@ -77,13 +77,57 @@ else:
     min_date = datetime.now().date() - timedelta(days=90)
     max_date = datetime.now().date()
 
-selected_date = st.date_input(
-    "Seleccionar fecha",
-    value=default_date,
-    max_value=max_date,
-    min_value=min_date,
-    help="Fechas disponibles con datos reales de La Gaceta" if available_dates else "Modo demo"
-)
+# Initialize session state for selected date
+if 'selected_date' not in st.session_state:
+    st.session_state.selected_date = default_date
+
+# Date navigation with large centered display
+nav_col1, nav_col2, nav_col3 = st.columns([1, 3, 1])
+
+# Get current date index
+current_idx = available_dates.index(st.session_state.selected_date) if st.session_state.selected_date in available_dates else 0
+has_prev = current_idx < len(available_dates) - 1
+has_next = current_idx > 0
+
+with nav_col1:
+    if st.button("← Anterior", use_container_width=True, type="secondary", disabled=not has_prev):
+        if has_prev:
+            st.session_state.selected_date = available_dates[current_idx + 1]
+            st.rerun()
+
+with nav_col2:
+    # Large centered date display
+    st.markdown(
+        f"<h2 style='text-align: center; color: #1E40AF; margin: 0;'>"
+        f"📅 {st.session_state.selected_date.strftime('%d de %B, %Y')}"
+        f"</h2>",
+        unsafe_allow_html=True
+    )
+
+with nav_col3:
+    if st.button("Siguiente →", use_container_width=True, type="secondary", disabled=not has_next):
+        if has_next:
+            st.session_state.selected_date = available_dates[current_idx - 1]
+            st.rerun()
+
+# Date picker for manual selection (smaller, below the main display)
+with st.expander("🗓️ Seleccionar otra fecha"):
+    selected_date = st.date_input(
+        "Elegir fecha específica",
+        value=st.session_state.selected_date,
+        max_value=max_date,
+        min_value=min_date,
+        help="Fechas con datos disponibles: 15-24 julio 2024",
+        label_visibility="collapsed"
+    )
+
+    # Update session state if date picker changes
+    if selected_date != st.session_state.selected_date:
+        st.session_state.selected_date = selected_date
+        st.rerun()
+
+# Use the session state date for content display
+selected_date = st.session_state.selected_date
 
 st.divider()
 
