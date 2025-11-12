@@ -12,27 +12,42 @@ import json
 import requests
 from datetime import datetime, timedelta
 from pathlib import Path
-import PyPDF2
+import pypdf
 from io import BytesIO
 from openai import OpenAI
+from bs4 import BeautifulSoup
 
 # Configuration
 DATA_DIR = Path(__file__).parent.parent / "data"
 SUMMARIES_FILE = DATA_DIR / "summaries.json"
 MAX_SUMMARIES = 90  # Keep last 90 days
-
-# La Gaceta URL pattern
-# Example: https://www.imprentanacional.go.cr/gaceta/2024/07/15/gaceta_20240715.pdf
-GACETA_URL_TEMPLATE = "https://www.imprentanacional.go.cr/gaceta/{year}/{month:02d}/{day:02d}/gaceta_{year}{month:02d}{day:02d}.pdf"
+GACETA_BASE_URL = "https://www.imprentanacional.go.cr"
 
 
-def get_gaceta_url(date):
-    """Generate La Gaceta PDF URL for a given date"""
-    return GACETA_URL_TEMPLATE.format(
-        year=date.year,
-        month=date.month,
-        day=date.day
-    )
+def scrape_latest_gaceta_url():
+    """
+    Scrape La Gaceta homepage to find today's PDF link dynamically.
+    More reliable than hardcoded URL patterns (based on V1 logic).
+    """
+    print("🔍 Scraping La Gaceta homepage for latest PDF...")
+    try:
+        response = requests.get(f"{GACETA_BASE_URL}/gaceta/", timeout=30)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, "html.parser")
+        anchor = soup.select_one("#ctl00_PdfGacetaDescargarHyperLink")
+
+        if anchor and anchor.get("href"):
+            pdf_path = anchor["href"]
+            full_url = f"{GACETA_BASE_URL}{pdf_path}" if pdf_path.startswith("/") else pdf_path
+            print(f"✅ Found PDF URL: {full_url}")
+            return full_url
+        else:
+            print("❌ Could not find PDF link on homepage")
+            return None
+    except Exception as e:
+        print(f"❌ Failed to scrape homepage: {e}")
+        return None
 
 
 def download_pdf(url):
@@ -51,7 +66,7 @@ def extract_text_from_pdf(pdf_bytes, max_pages=50):
     """Extract text from PDF (limit to first 50 pages to save costs)"""
     print("📄 Extracting text from PDF...")
     try:
-        reader = PyPDF2.PdfReader(pdf_bytes)
+        reader = pypdf.PdfReader(pdf_bytes)
         total_pages = len(reader.pages)
         pages_to_read = min(max_pages, total_pages)
 
@@ -162,25 +177,68 @@ def main():
     print("GacetaChat Daily Scraper - Alpha")
     print("=" * 60)
 
-    # Try today's date
     today = datetime.now()
-    date = today
+    summaries = load_summaries()
 
-    # La Gaceta is sometimes published with 1-2 day delay, so try today and yesterday
+    # First, try scraping homepage for latest PDF (most reliable)
+    print("\n🌐 Method 1: Scraping homepage for latest PDF...")
+    url = scrape_latest_gaceta_url()
+
+    if url:
+        pdf_bytes = download_pdf(url)
+        if pdf_bytes:
+            # Try to extract date from filename
+            # URL format: .../gaceta/2024/07/15/gaceta_20240715.pdf
+            try:
+                import re
+                match = re.search(r'gaceta[_/]?(\d{8})', url)
+                if match:
+                    date_str = datetime.strptime(match.group(1), "%Y%m%d").strftime("%Y-%m-%d")
+                else:
+                    date_str = today.strftime("%Y-%m-%d")
+            except:
+                date_str = today.strftime("%Y-%m-%d")
+
+            print(f"📅 Detected date: {date_str}")
+
+            if date_str in summaries:
+                print(f"✅ Summary already exists for {date_str}")
+            else:
+                # Process this PDF
+                text = extract_text_from_pdf(pdf_bytes)
+                if text and len(text) >= 1000:
+                    summary_data = summarize_with_gpt4(text, datetime.strptime(date_str, "%Y-%m-%d"))
+                    if summary_data:
+                        summary_data["date"] = date_str
+                        summary_data["pdf_url"] = url
+                        summary_data["generated_at"] = datetime.now().isoformat()
+                        summaries[date_str] = summary_data
+                        save_summaries(summaries)
+
+                        print(f"\n✅ SUCCESS! Summary for {date_str} saved")
+                        print(f"   Summary: {summary_data['summary']}")
+                        print(f"   Bullets: {len(summary_data['bullets'])}")
+                        print(f"   Topics: {', '.join(summary_data['topics'])}")
+
+                        print("\n" + "=" * 60)
+                        print(f"✨ Scraper finished. Total summaries: {len(summaries)}")
+                        print("=" * 60)
+                        return  # Success!
+
+    # Fallback: Try recent dates with URL pattern (if homepage scraping failed)
+    print("\n🔄 Method 2: Trying recent dates with URL pattern...")
     for offset in range(3):
         date = today - timedelta(days=offset)
         date_str = date.strftime("%Y-%m-%d")
 
         print(f"\n📅 Trying date: {date_str}")
 
-        # Check if we already have this summary
-        summaries = load_summaries()
         if date_str in summaries:
             print(f"✅ Summary already exists for {date_str}")
             continue
 
-        # Download PDF
-        url = get_gaceta_url(date)
+        # Construct URL from date
+        url = f"{GACETA_BASE_URL}/gaceta/{date.year}/{date.month:02d}/{date.day:02d}/gaceta_{date.year}{date.month:02d}{date.day:02d}.pdf"
         pdf_bytes = download_pdf(url)
 
         if pdf_bytes is None:

@@ -1,0 +1,54 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+
+    - name: Install dependencies
+      run: |
+        uv pip install --system pytest pytest-mock pytest-cov
+        uv pip install --system requests beautifulsoup4 pypdf python-dateutil streamlit openai
+
+    - name: Run unit tests (fast, no API costs)
+      run: |
+        pytest tests/ -v -m "not expensive and not integration"
+
+    - name: Run integration tests (network required, no API costs)
+      run: |
+        pytest tests/ -v -m "integration and not expensive"
+
+    - name: Run Streamlit app tests
+      run: |
+        pytest test_demo_simple.py -v
+
+    # Only run expensive tests on main/master branch (save API costs)
+    - name: Run expensive tests with real OpenAI API
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        pytest tests/ -v -m expensive
+
+    - name: Generate coverage report
+      if: always()
+      run: |
+        pytest tests/ test_demo_simple.py --cov=scripts --cov=demo_simple --cov-report=term-missing -m "not expensive"

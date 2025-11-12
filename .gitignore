@@ -17,6 +17,7 @@ venv/
 env/
 
 # V1 Prototype (archived - don't commit to avoid bloat)
+# Note: Temporarily unignored for review
 # archive/v1/
 
 # Data & Logs

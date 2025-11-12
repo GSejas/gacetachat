@@ -19,9 +19,12 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+
     - name: Install dependencies
       run: |
-        pip install openai requests PyPDF2 python-dateutil
+        uv pip install --system openai requests pypdf python-dateutil beautifulsoup4
 
     - name: Run scraper
       env:
