@@ -1,0 +1,37 @@
+name: Daily La Gaceta Scraper
+
+on:
+  schedule:
+    # Run daily at 6 AM Costa Rica time (UTC-6 = 12:00 UTC)
+    - cron: '0 12 * * *'
+  workflow_dispatch: # Allow manual trigger for testing
+
+jobs:
+  scrape-and-summarize:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install openai requests PyPDF2 python-dateutil
+
+    - name: Run scraper
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        python scripts/scrape_and_summarize.py
+
+    - name: Commit and push if changed
+      run: |
+        git config --global user.name 'GacetaChat Bot'
+        git config --global user.email 'bot@gacetachat.cr'
+        git add data/summaries.json
+        git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Daily summary: $(date +'%Y-%m-%d')" && git push)

@@ -68,6 +68,13 @@ This is an **unreleased prototype**. We're doing a complete rewrite with modern 
 - Collaboration opportunities
 - Perfect for grant applications & partnerships
 
+🎓 **[docs/NGO_EXPERT_ANALYSIS.md](docs/NGO_EXPERT_ANALYSIS.md)** ← **MUST READ for Strategy**
+- 50-year NGO veteran's assessment (MIT Professor)
+- Strategic repositioning recommendations
+- Theory of change & impact framework
+- Brutal truths about what makes civic tech succeed or fail
+- **⭐⭐⭐⭐½ rating with conditions**
+
 💰 **[docs/GRANT_STRATEGY.md](docs/GRANT_STRATEGY.md)** ← For grant applications
 - Funding strategy
 - Target grant sources

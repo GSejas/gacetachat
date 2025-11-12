@@ -22,14 +22,22 @@ import json
 from pathlib import Path
 
 # Load demo data
-@st.cache_data
+@st.cache_data(ttl=3600)  # Cache for 1 hour
 def load_demo_data():
-    """Load demo summaries from JSON file"""
+    """Load summaries from JSON file (live data or fallback to demo)"""
+    # Try live data first
+    live_file = Path(__file__).parent / "data" / "summaries.json"
+    if live_file.exists():
+        with open(live_file, 'r', encoding='utf-8') as f:
+            return json.load(f), True  # True = live data
+
+    # Fallback to demo data
     demo_file = Path(__file__).parent / "demo_data.json"
     if demo_file.exists():
         with open(demo_file, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {}
+            return json.load(f), False  # False = demo data
+
+    return {}, False
 
 # Page config
 st.set_page_config(
@@ -39,12 +47,15 @@ st.set_page_config(
 )
 
 # Load data
-demo_data = load_demo_data()
+demo_data, is_live = load_demo_data()
 available_dates = sorted([datetime.strptime(d, "%Y-%m-%d").date() for d in demo_data.keys()], reverse=True)
 
 # Title
 st.title("🇨🇷 GacetaChat")
-st.caption("Resúmenes diarios de La Gaceta Oficial - Generados con IA")
+if is_live:
+    st.caption("🟢 Resúmenes diarios de La Gaceta Oficial - Generados con IA")
+else:
+    st.caption("🟡 Demo con datos de ejemplo - Versión Alpha próximamente")
 
 # What is La Gaceta? - Prominent onboarding
 with st.expander("📖 ¿Qué es La Gaceta Oficial?", expanded=True):
@@ -181,6 +192,34 @@ with col2:
 with col3:
     if st.button("🔍 Buscar", use_container_width=True):
         st.info("Búsqueda estará disponible en v2.0")
+
+st.divider()
+
+# NGO/Organization Feedback Section
+if is_live:
+    st.markdown("### 🤝 ¿Eres parte de una ONG u organización?")
+    st.markdown("""
+    **Estamos buscando organizaciones para probar la versión Alpha** con resúmenes reales diarios.
+
+    Si tu organización monitorea La Gaceta regularmente, queremos tu feedback:
+    """)
+
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.link_button(
+            "📝 Registra tu Organización",
+            "https://forms.gle/YOUR_GOOGLE_FORM_ID",  # Replace with actual form
+            use_container_width=True,
+            type="primary"
+        )
+    with col_b:
+        st.link_button(
+            "📧 Contacto Directo",
+            "mailto:contact@gacetachat.cr",
+            use_container_width=True
+        )
+
+    st.info("💡 **Beneficios del Alpha**: Acceso anticipado, influencia en el desarrollo, soporte directo")
 
 st.divider()
 
