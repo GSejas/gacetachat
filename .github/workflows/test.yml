@@ -25,7 +25,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        uv pip install --system pytest pytest-mock pytest-cov
+        uv pip install --system pytest pytest-mock pytest-cov psutil
         uv pip install --system requests beautifulsoup4 pypdf python-dateutil streamlit openai
 
     - name: Run unit tests (fast, no API costs)
@@ -39,6 +39,10 @@ jobs:
     - name: Run Streamlit app tests
       run: |
         pytest test_demo_simple.py -v
+
+    - name: Run smoke tests
+      run: |
+        pytest test/smoke/ -v --tb=short
 
     # Only run expensive tests on main/master branch (save API costs)
     - name: Run expensive tests with real OpenAI API
