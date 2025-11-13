@@ -178,15 +178,20 @@ st.divider()
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    if st.button("📄 PDF Original", use_container_width=True):
-        # Check if we have a local PDF
-        if day_data and "pdf_url" in day_data and Path(day_data["pdf_url"]).exists():
-            st.success(f"✅ PDF local disponible: `{day_data['pdf_url']}`")
-        st.link_button(
-            "Abrir en sitio oficial",
-            "https://www.imprentanacional.go.cr/gaceta/",
-            use_container_width=True
-        )
+    # Use actual PDF URL if available, otherwise fallback to homepage
+    if day_data and "pdf_url" in day_data:
+        pdf_link = day_data["pdf_url"]
+        button_text = "📄 Abrir PDF Original"
+    else:
+        pdf_link = "https://www.imprentanacional.go.cr/gaceta/"
+        button_text = "📄 Ir a La Gaceta"
+
+    st.link_button(
+        button_text,
+        pdf_link,
+        use_container_width=True,
+        type="primary"
+    )
 
 with col2:
     if st.button("🔗 Compartir", use_container_width=True):
