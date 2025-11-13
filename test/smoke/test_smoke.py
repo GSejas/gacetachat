@@ -48,14 +48,12 @@ class TestConfiguration:
 
     def test_environment_variables(self):
         """Test that environment can be properly configured."""
-        # These are optional in serverless alpha
-        openai_key = os.getenv("OPENAI_API_KEY")
-        # Just verify we can check the environment
-        assert isinstance(os.environ, dict)
+        # Just verify we can access the environment
+        assert hasattr(os, "environ")
+        assert len(os.environ) > 0
 
     def test_data_directory_exists(self):
-        """Test that data directory can be created."""
-        data_dir = project_root / "data"
+        """Test that project root exists."""
         # Directory may not exist yet, but path should be valid
         assert project_root.exists()
         assert project_root.is_dir()
@@ -187,8 +185,6 @@ class TestDependencies:
                 # Handle package name differences
                 if package == "beautifulsoup4":
                     importlib.import_module("bs4")
-                elif package == "pypdf":
-                    importlib.import_module("PyPDF2")
                 else:
                     importlib.import_module(package)
             except ImportError as e:
