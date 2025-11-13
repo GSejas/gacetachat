@@ -17,10 +17,13 @@ import pypdf
 from io import BytesIO
 from openai import OpenAI
 from bs4 import BeautifulSoup
+from pdf2image import convert_from_bytes
+from PIL import Image, ImageEnhance
 
 # Configuration
 DATA_DIR = Path(__file__).parent.parent / "data"
 SUMMARIES_FILE = DATA_DIR / "summaries.json"
+IMAGES_DIR = DATA_DIR / "header_images"
 MAX_SUMMARIES = 90  # Keep last 90 days
 GACETA_BASE_URL = "https://www.imprentanacional.go.cr"
 
@@ -60,6 +63,62 @@ def download_pdf(url):
         return BytesIO(response.content)
     except requests.exceptions.RequestException as e:
         print(f"❌ Failed to download: {e}")
+        return None
+
+
+def create_header_image(pdf_bytes, date_str):
+    """
+    Convert first half of first PDF page to darkened header image.
+    Saves to data/header_images/{date}.jpg
+    Returns: relative path to image or None
+    """
+    print("🎨 Creating header image from PDF...")
+    try:
+        # Ensure directory exists
+        IMAGES_DIR.mkdir(exist_ok=True, parents=True)
+
+        # Convert first page only (DPI=150 for balance of quality/size)
+        images = convert_from_bytes(
+            pdf_bytes.read(),
+            first_page=1,
+            last_page=1,
+            dpi=150
+        )
+
+        if not images:
+            print("⚠️ No images generated from PDF")
+            return None
+
+        # Get first page
+        page_image = images[0]
+
+        # Crop to top half (header area)
+        width, height = page_image.size
+        header_image = page_image.crop((0, 0, width, height // 2))
+
+        # Darken image (reduce brightness by 40%, increase contrast slightly)
+        enhancer_brightness = ImageEnhance.Brightness(header_image)
+        darkened = enhancer_brightness.enhance(0.6)  # 60% of original brightness
+
+        enhancer_contrast = ImageEnhance.Contrast(darkened)
+        final_image = enhancer_contrast.enhance(1.1)  # Slight contrast boost
+
+        # Save as JPEG (smaller than PNG)
+        output_path = IMAGES_DIR / f"{date_str}.jpg"
+        final_image.save(output_path, "JPEG", quality=85, optimize=True)
+
+        # Get file size
+        size_kb = output_path.stat().st_size / 1024
+        print(f"✅ Header image saved: {output_path.name} ({size_kb:.1f} KB)")
+
+        # Return relative path from data/ directory
+        return f"header_images/{date_str}.jpg"
+
+    except ImportError:
+        print("⚠️ pdf2image or PIL not installed - skipping header image")
+        return None
+    except Exception as e:
+        print(f"⚠️ Failed to create header image: {e}")
         return None
 
 
@@ -259,13 +318,25 @@ def main():
                 print(f"✅ Summary already exists for {date_str}")
             else:
                 # Process this PDF
+                # First, create header image (need to reset BytesIO after reading)
+                pdf_bytes_copy = BytesIO(pdf_bytes.getvalue())
+                header_image_path = create_header_image(pdf_bytes_copy, date_str)
+
+                # Reset and extract text
+                pdf_bytes.seek(0)
                 text = extract_text_from_pdf(pdf_bytes)
+
                 if text and len(text) >= 1000:
                     summary_data = summarize_with_gpt4(text, datetime.strptime(date_str, "%Y-%m-%d"))
                     if summary_data:
                         summary_data["date"] = date_str
                         summary_data["pdf_url"] = url
                         summary_data["generated_at"] = datetime.now().isoformat()
+
+                        # Add header image path if created successfully
+                        if header_image_path:
+                            summary_data["header_image"] = header_image_path
+
                         summaries[date_str] = summary_data
                         save_summaries(summaries)
 
@@ -273,6 +344,8 @@ def main():
                         print(f"   Summary: {summary_data['summary']}")
                         print(f"   Bullets: {len(summary_data['bullets'])}")
                         print(f"   Topics: {', '.join(summary_data['topics'])}")
+                        if header_image_path:
+                            print(f"   Header: {header_image_path}")
 
                         print("\n" + "=" * 60)
                         print(f"✨ Scraper finished. Total summaries: {len(summaries)}")

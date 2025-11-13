@@ -1,0 +1,17 @@
+# GacetaChat Scraper Dependencies
+# Used by GitHub Actions daily-scraper workflow
+
+# Core dependencies
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+pypdf>=3.17.0
+python-dateutil>=2.8.2
+pytz>=2024.1
+openai>=1.3.0
+
+# Image processing for header images
+pdf2image>=1.16.3
+Pillow>=10.0.0
+
+# Note: pdf2image requires poppler-utils on the system
+# GitHub Actions: sudo apt-get install -y poppler-utils

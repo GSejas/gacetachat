@@ -9,5 +9,7 @@
         "*.md": "vscode.markdown.preview.editor"
     },
     // Optional: open markdown links in preview
-    "markdown.preview.openMarkdownLinks": "inPreview"
+    "markdown.preview.openMarkdownLinks": "inPreview",
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "python-envs.pythonProjects": []
 }

@@ -29,6 +29,7 @@ download.log
 *.faiss
 *.pkl
 data/ngo_signups.json  # NGO signup form data (sensitive)
+# data/header_images/ - Committed (needed for demo to display headers)
 
 # Environment & Secrets
 .env

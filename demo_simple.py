@@ -150,6 +150,12 @@ date_key = selected_date.strftime("%Y-%m-%d")
 day_data = demo_data.get(date_key)
 
 if day_data:
+    # Display header image if available (darkened first page of PDF)
+    if "header_image" in day_data:
+        header_path = Path(__file__).parent / "data" / day_data["header_image"]
+        if header_path.exists():
+            st.image(str(header_path), use_container_width=True, caption="La Gaceta Oficial")
+
     # Real data from demo_data.json
     st.subheader(f"📋 Resumen - {selected_date.strftime('%d de %B, %Y')}")
     st.write(day_data["summary"])
