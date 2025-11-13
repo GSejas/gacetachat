@@ -63,52 +63,71 @@ def download_pdf(url):
 
 
 def extract_text_from_pdf(pdf_bytes, max_pages=50):
-    """Extract text from PDF (limit to first 50 pages to save costs)"""
+    """Extract text from PDF with page tracking (limit to first 50 pages to save costs)"""
     print("📄 Extracting text from PDF...")
     try:
         reader = pypdf.PdfReader(pdf_bytes)
         total_pages = len(reader.pages)
         pages_to_read = min(max_pages, total_pages)
 
-        text = ""
+        # Extract text with page markers for reference
+        text_with_pages = ""
         for i in range(pages_to_read):
             page = reader.pages[i]
-            text += page.extract_text() + "\n"
+            page_num = i + 1  # 1-indexed for humans
+            text_with_pages += f"\n[PÁGINA {page_num}]\n"
+            text_with_pages += page.extract_text() + "\n"
 
-        print(f"✅ Extracted {len(text)} characters from {pages_to_read}/{total_pages} pages")
-        return text
+        print(f"✅ Extracted {len(text_with_pages)} characters from {pages_to_read}/{total_pages} pages")
+        return text_with_pages
     except Exception as e:
         print(f"❌ Failed to extract text: {e}")
         return None
 
 
 def summarize_with_gpt4(text, date):
-    """Use GPT-4o to create a 5-bullet summary"""
+    """Use GPT-4o to create a 5-bullet summary with page references"""
     print("🤖 Generating summary with GPT-4o...")
 
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
+    # Prompt version for tracking and reproducibility
+    PROMPT_VERSION = "2.0.0"  # Semver: major.minor.patch
+
     prompt = f"""Eres un asistente experto en resumir documentos legales de Costa Rica.
 
 A continuación está el texto de La Gaceta Oficial de Costa Rica del {date.strftime('%d de %B, %Y')}.
+
+El texto incluye marcadores de página en formato [PÁGINA N]. DEBES incluir estas referencias en tu resumen.
 
 Tu tarea:
 1. Lee el documento completo
 2. Identifica los 5 cambios, decisiones o anuncios más importantes
 3. Crea un resumen de 5 puntos en español claro y simple
 4. Cada punto debe tener un emoji relevante al inicio
-5. Identifica 3-5 temas principales (ej: Legal, Fiscal, Salud, Educación, Ambiente)
+5. IMPORTANTE: Para cada punto, incluye las páginas donde aparece la información
+6. Identifica 3-5 temas principales (ej: Legal, Fiscal, Salud, Educación, Ambiente)
 
 Formato de respuesta (JSON):
 {{
   "summary": "Breve resumen general en 1-2 oraciones",
   "bullets": [
-    {{"icon": "⚖️", "text": "Descripción del cambio legal o decisión"}},
-    {{"icon": "💰", "text": "Descripción del cambio fiscal"}},
+    {{
+      "icon": "⚖️",
+      "text": "Descripción del cambio legal o decisión",
+      "pages": [1, 2]
+    }},
+    {{
+      "icon": "💰",
+      "text": "Descripción del cambio fiscal",
+      "pages": [5]
+    }},
     ...
   ],
   "topics": ["Legal", "Fiscal", "Salud", ...]
 }}
+
+IMPORTANTE: El campo "pages" debe ser un array de números de página donde encontraste la información.
 
 Texto de La Gaceta:
 {text[:15000]}
@@ -117,7 +136,7 @@ Responde SOLO con el JSON, sin texto adicional."""
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o",  # More cost-effective than gpt-4-turbo
+            model="gpt-5-mini",  # 88% cheaper than gpt-4o (~$2/year vs $17/year)
             messages=[
                 {"role": "system", "content": "Eres un experto en resumir documentos legales oficiales de Costa Rica."},
                 {"role": "user", "content": prompt}
@@ -140,7 +159,23 @@ Responde SOLO con el JSON, sin texto adicional."""
 
         summary_data = json.loads(result)
 
-        print(f"✅ Summary generated: {len(summary_data['bullets'])} bullets")
+        # Add metadata for transparency and reproducibility
+        summary_data["prompt_version"] = PROMPT_VERSION
+        summary_data["model"] = "gpt-5-mini"
+
+        # Track API usage for cost monitoring
+        usage = response.usage
+        cost_input = (usage.prompt_tokens / 1_000_000) * 0.25  # $0.25 per 1M input tokens
+        cost_output = (usage.completion_tokens / 1_000_000) * 2.00  # $2.00 per 1M output tokens
+        summary_data["api_cost_usd"] = round(cost_input + cost_output, 4)
+        summary_data["tokens"] = {
+            "input": usage.prompt_tokens,
+            "output": usage.completion_tokens,
+            "total": usage.total_tokens
+        }
+
+        print(f"✅ Summary generated: {len(summary_data['bullets'])} bullets (prompt v{PROMPT_VERSION})")
+        print(f"💰 Cost: ${summary_data['api_cost_usd']:.4f} | Tokens: {usage.total_tokens}")
         return summary_data
 
     except Exception as e:
@@ -187,17 +222,33 @@ def main():
     if url:
         pdf_bytes = download_pdf(url)
         if pdf_bytes:
-            # Try to extract date from filename
-            # URL format: .../gaceta/2024/07/15/gaceta_20240715.pdf
+            # Extract date from URL
+            # URL formats:
+            # - https://www.imprentanacional.go.cr/pub/2025/11/12/COMP_12_11_2025.pdf (DD_MM_YYYY)
+            # - Old: .../gaceta/2024/07/15/gaceta_20240715.pdf (YYYYMMDD)
             try:
                 import re
-                match = re.search(r'gaceta[_/]?(\d{8})', url)
+                # Try new format: COMP_DD_MM_YYYY.pdf
+                match = re.search(r'COMP_(\d{2})_(\d{2})_(\d{4})\.pdf', url)
                 if match:
-                    date_str = datetime.strptime(match.group(1), "%Y%m%d").strftime("%Y-%m-%d")
+                    day, month, year = match.groups()
+                    gazette_date = datetime.strptime(f"{year}-{month}-{day}", "%Y-%m-%d")
+                    date_str = gazette_date.strftime("%Y-%m-%d")
+                    print(f"📅 Extracted date from filename: {date_str}")
                 else:
-                    date_str = today.strftime("%Y-%m-%d")
-            except:
+                    # Try old format: gaceta_YYYYMMDD
+                    match = re.search(r'gaceta[_/]?(\d{8})', url)
+                    if match:
+                        gazette_date = datetime.strptime(match.group(1), "%Y%m%d")
+                        date_str = gazette_date.strftime("%Y-%m-%d")
+                        print(f"📅 Extracted date from filename: {date_str}")
+                    else:
+                        # Fallback to today's date
+                        date_str = today.strftime("%Y-%m-%d")
+                        print(f"⚠️ Could not extract date from URL, using today: {date_str}")
+            except Exception as e:
                 date_str = today.strftime("%Y-%m-%d")
+                print(f"⚠️ Date extraction failed ({e}), using today: {date_str}")
 
             print(f"📅 Detected date: {date_str}")
 

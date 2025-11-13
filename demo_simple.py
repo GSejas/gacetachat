@@ -156,13 +156,34 @@ if day_data:
 
     st.markdown("### 📌 Puntos Clave:")
     for bullet in day_data["bullets"]:
-        st.markdown(f"**{bullet['icon']}** {bullet['text']}")
+        # Include page references if available (for transparency)
+        if "pages" in bullet and bullet["pages"]:
+            pages_str = ", ".join([f"p.{p}" for p in bullet["pages"]])
+            st.markdown(f"**{bullet['icon']}** {bullet['text']} *({pages_str})*")
+        else:
+            st.markdown(f"**{bullet['icon']}** {bullet['text']}")
 
     st.divider()
 
     # Topics
     st.markdown("### 🏷️ Temas:")
     st.markdown(" • ".join([f"**{t}**" for t in day_data["topics"]]))
+
+    # Metadata (for transparency and reproducibility)
+    if "prompt_version" in day_data or "model" in day_data or "generated_at" in day_data:
+        with st.expander("🔍 Metadata del Resumen"):
+            col_meta1, col_meta2, col_meta3 = st.columns(3)
+            with col_meta1:
+                if "model" in day_data:
+                    st.caption(f"**Modelo**: {day_data['model']}")
+            with col_meta2:
+                if "prompt_version" in day_data:
+                    st.caption(f"**Prompt**: v{day_data['prompt_version']}")
+            with col_meta3:
+                if "generated_at" in day_data:
+                    from datetime import datetime
+                    gen_time = datetime.fromisoformat(day_data['generated_at'])
+                    st.caption(f"**Generado**: {gen_time.strftime('%H:%M UTC')}")
 
     # Store PDF URL for later use
     pdf_url = day_data.get("pdf_url", "https://www.imprentanacional.go.cr/gaceta/")
