@@ -136,13 +136,13 @@ Responde SOLO con el JSON, sin texto adicional."""
 
     try:
         response = client.chat.completions.create(
-            model="gpt-5-mini",  # 88% cheaper than gpt-4o (~$2/year vs $17/year)
+            model="gpt-4o-mini",  # Cost-effective option (~$0.15 per 1M input tokens)
             messages=[
                 {"role": "system", "content": "Eres un experto en resumir documentos legales oficiales de Costa Rica."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.3,  # Lower temperature for more factual summaries
-            max_tokens=1000
+            max_completion_tokens=1000  # Updated API parameter name
         )
 
         result = response.choices[0].message.content.strip()
