@@ -80,13 +80,14 @@ st.divider()
 
 # Date selector with navigation
 if available_dates:
-    default_date = available_dates[0]
-    min_date = available_dates[-1]
-    max_date = available_dates[0]
+    # available_dates is sorted newest first (reverse=True)
+    default_date = available_dates[0]  # Newest date
+    max_date = available_dates[0]      # Newest date
+    min_date = available_dates[-1]     # Oldest date
 else:
     default_date = datetime.now().date()
-    min_date = datetime.now().date() - timedelta(days=90)
     max_date = datetime.now().date()
+    min_date = datetime.now().date() - timedelta(days=90)
 
 # Initialize session state for selected date
 if 'selected_date' not in st.session_state:
