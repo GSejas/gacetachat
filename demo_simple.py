@@ -316,42 +316,106 @@ with st.form("ngo_signup_form"):
                 "comments": comments
             }
 
-            # Append to file (create if doesn't exist)
-            signups_file = Path(__file__).parent / "data" / "ngo_signups.json"
-            signups_file.parent.mkdir(exist_ok=True)
-
+            # Save to GitHub Issues (works in Streamlit Cloud)
             try:
-                # Load existing signups
-                if signups_file.exists():
-                    with open(signups_file, 'r', encoding='utf-8') as f:
-                        signups = json.load(f)
+                import requests
+
+                # Format topics for readability
+                selected_topics = [k.title() for k, v in signup_data["topics"].items() if v]
+                topics_str = ", ".join(selected_topics) if selected_topics else "Ninguno"
+
+                # Create GitHub issue body
+                issue_body = f"""## 📋 Nueva Organización Registrada
+
+**Organización:** {org_name}
+**Tipo:** {org_type}
+**Contacto:** {contact_name}
+**Email:** {contact_email}
+
+### Detalles de Uso
+- **Frecuencia de monitoreo actual:** {monitoring_frequency}
+- **Temas de interés:** {topics_str}
+- **Interés en premium:** {premium_interest}
+
+### Comentarios Adicionales
+{comments if comments else "*Sin comentarios*"}
+
+---
+
+**Timestamp:** {signup_data['timestamp']}
+**Fuente:** Formulario web en demo GacetaChat
+"""
+
+                # Get GitHub token from Streamlit secrets (or environment)
+                github_token = st.secrets.get("GITHUB_TOKEN", os.environ.get("GITHUB_TOKEN"))
+
+                if github_token:
+                    # Create GitHub issue
+                    response = requests.post(
+                        "https://api.github.com/repos/GSejas/gacetachat/issues",
+                        headers={
+                            "Authorization": f"token {github_token}",
+                            "Accept": "application/vnd.github.v3+json"
+                        },
+                        json={
+                            "title": f"NGO Signup: {org_name}",
+                            "body": issue_body,
+                            "labels": ["ngo-signup", "alpha-program"]
+                        },
+                        timeout=10
+                    )
+
+                    if response.status_code == 201:
+                        st.success(f"""
+✅ **¡Gracias, {org_name}!**
+
+Tu organización ha sido registrada para el programa Alpha de GacetaChat.
+
+**Próximos pasos:**
+1. Recibirás un email en {contact_email} en las próximas 48 horas
+2. Te daremos acceso anticipado a funciones premium (gratis durante Alpha)
+3. Agendaremos una llamada de 30 minutos para co-diseñar las funciones que tu organización necesita
+
+**Beneficios del Alpha:**
+- Acceso anticipado (6 meses antes del lanzamiento público)
+- Funciones premium gratis durante el piloto
+- Influencia directa en el desarrollo del producto
+- Soporte directo del equipo técnico
+- Reconocimiento como organización fundadora
+                        """)
+                    else:
+                        # Fallback: Save locally (for local development)
+                        st.warning("⚠️ No se pudo conectar con el servidor. Tu registro ha sido guardado localmente.")
+                        signups_file = Path(__file__).parent / "data" / "ngo_signups.json"
+                        signups_file.parent.mkdir(exist_ok=True)
+
+                        if signups_file.exists():
+                            with open(signups_file, 'r', encoding='utf-8') as f:
+                                signups = json.load(f)
+                        else:
+                            signups = []
+
+                        signups.append(signup_data)
+
+                        with open(signups_file, 'w', encoding='utf-8') as f:
+                            json.dump(signups, f, indent=2, ensure_ascii=False)
                 else:
-                    signups = []
+                    # Fallback for local development without token
+                    signups_file = Path(__file__).parent / "data" / "ngo_signups.json"
+                    signups_file.parent.mkdir(exist_ok=True)
 
-                # Add new signup
-                signups.append(signup_data)
+                    if signups_file.exists():
+                        with open(signups_file, 'r', encoding='utf-8') as f:
+                            signups = json.load(f)
+                    else:
+                        signups = []
 
-                # Save back
-                with open(signups_file, 'w', encoding='utf-8') as f:
-                    json.dump(signups, f, indent=2, ensure_ascii=False)
+                    signups.append(signup_data)
 
-                st.success(f"""
-                ✅ **¡Gracias, {org_name}!**
+                    with open(signups_file, 'w', encoding='utf-8') as f:
+                        json.dump(signups, f, indent=2, ensure_ascii=False)
 
-                Tu organización ha sido registrada para el programa Alpha de GacetaChat.
-
-                **Próximos pasos:**
-                1. Recibirás un email en {contact_email} en las próximas 48 horas
-                2. Te daremos acceso anticipado a funciones premium (gratis durante Alpha)
-                3. Agendaremos una llamada de 30 minutos para co-diseñar las funciones que tu organización necesita
-
-                **Beneficios del Alpha:**
-                - Acceso anticipado (6 meses antes del lanzamiento público)
-                - Funciones premium gratis durante el piloto
-                - Influencia directa en el desarrollo del producto
-                - Soporte directo del equipo técnico
-                - Reconocimiento como organización fundadora
-                """)
+                    st.success(f"✅ ¡Gracias, {org_name}! Tu registro ha sido guardado (modo desarrollo local).")
 
                 # Show mailto link
                 st.markdown(f"📧 **Contacto directo:** [contact@gacetachat.cr](mailto:contact@gacetachat.cr?subject=Alpha%20-%20{org_name})")
