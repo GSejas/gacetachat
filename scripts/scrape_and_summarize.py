@@ -12,6 +12,7 @@ import json
 import requests
 from datetime import datetime, timedelta
 from pathlib import Path
+import pytz
 import pypdf
 from io import BytesIO
 from openai import OpenAI
@@ -212,7 +213,9 @@ def main():
     print("GacetaChat Daily Scraper - Alpha")
     print("=" * 60)
 
-    today = datetime.now()
+    # Use Costa Rica timezone (UTC-6)
+    costa_rica_tz = pytz.timezone("America/Costa_Rica")
+    today = datetime.now(costa_rica_tz)
     summaries = load_summaries()
 
     # First, try scraping homepage for latest PDF (most reliable)

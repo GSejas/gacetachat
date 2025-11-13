@@ -27,7 +27,7 @@ jobs:
     
     - name: Install dependencies
       run: |
-        uv pip install --system pytest pytest-cov black ruff psutil
+        uv pip install --system pytest pytest-cov black ruff psutil pytz
         uv pip install --system openai requests pypdf python-dateutil beautifulsoup4 streamlit
     
     - name: Lint with ruff
