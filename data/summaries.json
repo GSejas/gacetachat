@@ -32,5 +32,62 @@
     "date": "2025-11-13",
     "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/12/COMP_12_11_2025.pdf",
     "generated_at": "2025-11-13T04:37:21.077668"
+  },
+  "2025-11-12": {
+    "summary": "La Gaceta Oficial del 12 de noviembre de 2025 presenta varios acuerdos importantes del Poder Ejecutivo, incluyendo la acreditación de traductores oficiales, registros de productos veterinarios y la participación de Costa Rica en eventos internacionales sobre competencia.",
+    "bullets": [
+      {
+        "icon": "📜",
+        "text": "Se nombra a Daniela Mizrachi Mourelo como traductora oficial en hebreo-español tras aprobar el concurso correspondiente.",
+        "pages": [
+          2
+        ]
+      },
+      {
+        "icon": "🐾",
+        "text": "Se registran nuevos productos veterinarios, como Celesporin y CICLOCELL, para el tratamiento de infecciones en animales.",
+        "pages": [
+          3
+        ]
+      },
+      {
+        "icon": "🌐",
+        "text": "La COPROCOM autoriza la participación de su presidenta en la III Semana de la Competencia 2025 en República Dominicana.",
+        "pages": [
+          4
+        ]
+      },
+      {
+        "icon": "💼",
+        "text": "Se discute el Proyecto de Ley para facilitar la compra directa a micro, pequeños y medianos productores por parte de juntas educativas.",
+        "pages": [
+          4
+        ]
+      },
+      {
+        "icon": "📊",
+        "text": "Se abordan temas de regulación de mercados digitales en el Congreso Internacional sobre Derecho de la Competencia.",
+        "pages": [
+          4
+        ]
+      }
+    ],
+    "topics": [
+      "Legal",
+      "Salud",
+      "Economía",
+      "Competencia"
+    ],
+    "prompt_version": "2.0.0",
+    "model": "gpt-5-mini",
+    "api_cost_usd": 0.0018,
+    "tokens": {
+      "input": 4385,
+      "output": 334,
+      "total": 4719
+    },
+    "date": "2025-11-12",
+    "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/12/COMP_12_11_2025.pdf",
+    "generated_at": "2025-11-13T05:30:24.373532"
   }
 }
