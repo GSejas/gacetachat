@@ -1,7 +1,7 @@
 # GacetaChat - Dossier para ONGs y Organizaciones
-## Transparencia Gubernamental con Inteligencia Artificial
+## Infraestructura Democrática para la Sociedad Civil
 
-**Versión**: 2.0
+**Versión**: 3.0 (Actualizado con recomendaciones de experta en ONGs - MIT)
 **Fecha**: Noviembre 2025
 **Contacto**: [GitHub](https://github.com/GSejas/gacetachat)
 
@@ -9,29 +9,67 @@
 
 ## 🎯 Resumen Ejecutivo
 
-**GacetaChat** es una herramienta de código abierto que utiliza inteligencia artificial para convertir las 50-200 páginas diarias de La Gaceta Oficial en resúmenes de 5 puntos legibles en 30 segundos.
+**GacetaChat es infraestructura democrática pública**, diseñada específicamente para empoderar a las organizaciones de la sociedad civil costarricense.
 
-**Problema**: Nadie lee La Gaceta porque es denso y extenso, pero contiene información vital sobre leyes, decretos y decisiones gubernamentales que afectan a todos los costarricenses.
+**El Problema Real**: La Gaceta Oficial publica 50-200 páginas diarias de leyes, decretos y regulaciones. Corporaciones y lobbyistas la monitorean constantemente, creando **asimetría de información** que debilita a las ONGs y a la democracia.
 
-**Solución**: IA que lee, analiza y resume La Gaceta automáticamente cada día, haciéndola accesible para el ciudadano común.
+**Nuestra Solución**: GacetaChat usa IA para leer La Gaceta cada día y generar resúmenes accionables. No es una app - es **infraestructura pública** para la defensoría y transparencia.
+
+**Teoría de Cambio**: ONGs empoderadas → Medios/Defensoría activa → Ciudadanía informada → Democracia fortalecida
 
 ---
 
 ## 📊 Impacto Esperado
 
-### Beneficiarios Directos
-- **3.5 millones** de costarricenses con acceso digital
-- **10,000** usuarios mensuales en el primer año
-- **50+** citas en medios de comunicación
-- **10+** integraciones con organizaciones
+### Usuarios Prioritarios (En Orden Estratégico)
 
-### Audiencia Objetivo
-1. **Ciudadanos** - Entender qué hace su gobierno
-2. **Empresarios** - Regulaciones que afectan sus negocios
-3. **Periodistas** - Fuente para investigación y noticias
-4. **Abogados** - Monitoreo de cambios legales
-5. **ONGs** - Seguimiento de políticas públicas
-6. **Académicos** - Investigación y análisis
+#### Tier 1: ONGs Ambientales 🌱
+**Por qué primero**: Las regulaciones ambientales cambian constantemente vía La Gaceta. Estas organizaciones NECESITAN este servicio.
+
+**Ejemplos**: FECON, Costa Rica Limpia, APREFLOFAS, grupos conservacionistas locales
+
+**Casos de uso**:
+- Alertas automáticas cuando aparecen: "SINAC", "MINAE", "bosque", "contaminación"
+- Monitoreo de permisos ambientales y concesiones
+- Análisis histórico de tendencias en políticas ambientales
+
+#### Tier 2: ONGs de Transparencia y Anti-corrupción ⚖️
+**Por qué segundo**: Tienen financiamiento, conexiones mediáticas y voluntad política.
+
+**Ejemplos**: Transparency International CR, Ojo al Voto, organizaciones de vigilancia ciudadana
+
+**Casos de uso**:
+- Rastreo de contratos gubernamentales
+- Monitoreo de nombramientos políticos
+- Detección de anomalías en licitaciones
+
+#### Tier 3: ONGs de Derechos Laborales y Justicia Social 👷
+**Ejemplos**: Sindicatos, organizaciones de derechos de mujeres, grupos indígenas, defensorías de personas con discapacidad
+
+**Casos de uso**:
+- Cambios en leyes laborales
+- Decisiones de la CCSS
+- Anuncios de salario mínimo
+- Contrataciones del sector público
+
+#### Usuarios Secundarios
+4. **Periodistas** - Amplifican hallazgos de ONGs a la ciudadanía
+5. **Instituciones Académicas** - Investigación sobre políticas públicas
+6. **Ciudadanía General** - Beneficiarios finales de la transparencia
+
+### Métricas de Éxito (Año 1)
+
+**Métricas de Adopción Organizacional (Primarias)**:
+- 10+ ONGs usando GacetaChat diariamente
+- 5+ organizaciones pagando suscripción premium
+- 50+ historias mediáticas citando datos de GacetaChat
+- 20+ casos documentados de defensoría informada por GacetaChat
+
+**Métricas de Impacto Democrático (Secundarias)**:
+- Aumento en comentarios públicos sobre regulaciones
+- Reducción en tiempo de respuesta de ONGs a políticas
+- Incremento en detección temprana de problemas de gobernanza
+- Correlación con aumento en rendición de cuentas gubernamental
 
 ---
 

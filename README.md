@@ -1,6 +1,6 @@
 # GacetaChat 2.0 🇨🇷
 
-> Daily AI summaries of Costa Rica's official gazette. Simple. Fast. Open source.
+> Democratic infrastructure empowering NGOs and civil society to monitor government through AI-powered gazette summaries.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Planning-yellow.svg)](IMPLEMENTATION_PLAN.md)
@@ -9,9 +9,11 @@
 
 ## What is this?
 
-**The Problem:** Costa Rica publishes laws and regulations daily in La Gaceta, but it's 50-200 pages of dense legal text. Nobody reads it.
+**The Problem:** Costa Rica publishes 50-200 pages daily of laws and regulations in La Gaceta. This creates massive information asymmetry - corporations and lobbyists monitor it, but NGOs and citizens can't keep up.
 
-**Our Solution:** AI generates a 5-bullet summary every morning. Takes 30 seconds to read. Everyone understands what changed.
+**Our Solution:** GacetaChat is **public democratic infrastructure** that uses AI to generate 5-bullet summaries every morning. Designed for NGOs first, citizens second.
+
+**Theory of Change:** NGOs → Media/Advocacy → Citizens → Stronger Democracy
 
 **Example:**
 ```
@@ -34,11 +36,14 @@ graph LR
     B -->|GPT-4o| C[AI Summary]
     C -->|Store| D[Database]
     D -->|API| E[Frontend]
-    E -->|30 seconds| F[Citizens]
+    E -->|30 seconds| F[NGOs/CSOs]
+    F -->|Advocacy| G[Media & Citizens]
+    G -->|Participation| H[Democracy]
 
     style A fill:#f9f,stroke:#333,stroke-width:2px
     style C fill:#9f9,stroke:#333,stroke-width:2px
     style F fill:#99f,stroke:#333,stroke-width:2px
+    style H fill:#d4edda,stroke:#333,stroke-width:2px
 ```
 
 ---
@@ -119,7 +124,7 @@ This is an **unreleased prototype**. We're doing a complete rewrite with modern 
 flowchart TB
     subgraph External
         LG[La Gaceta<br/>Official Site]
-        Users[Citizens<br/>Journalists<br/>Businesses]
+        Users[NGOs/CSOs<br/>Journalists<br/>Citizens]
     end
 
     subgraph Frontend["Frontend (Vercel)"]
@@ -163,20 +168,27 @@ flowchart TB
 
 ## MVP Features (4 Weeks - AI-Accelerated)
 
-### What We're Building
+### What We're Building (NGO-First Features)
 1. **Daily Summary** - Homepage shows today's gazette in 5 bullet points
 2. **Archive** - Calendar to browse past 90 days
-3. **Search** - Find summaries by keyword
-4. **Public API** - Free REST API for developers
+3. **Keyword Search** - Find summaries by topic (ambiente, SINAC, CCSS, etc.)
+4. **Public API** - Free REST API (100 requests/day for individuals)
+5. **WhatsApp/Telegram Alerts** - Critical for Costa Rican NGOs
+
+### Premium Features for NGOs ($50-200/month)
+- Custom keyword alerts (email, WhatsApp, Telegram)
+- Advanced search with regex patterns
+- Historical trend analysis
+- Higher API limits (unlimited for organizations)
+- Priority support
 
 ### What We're NOT Building (Yet)
-- User accounts
-- Comments/community
-- Email notifications
-- Twitter bot
-- Chat interface
-- Analytics
-- Any complexity
+- User accounts (freemium model doesn't require login)
+- Comments/community (Phase 2+)
+- Email notifications for individuals (NGOs only)
+- Twitter bot (deferred)
+- Chat interface (deferred)
+- Analytics dashboard (Phase 2+)
 
 ---
 
@@ -331,19 +343,20 @@ gantt
 
 ```mermaid
 journey
-    title Citizen's Morning Routine with GacetaChat
+    title Environmental NGO's Workflow with GacetaChat
     section Before GacetaChat
-      Wake up: 3: Citizen
-      Check news: 4: Citizen
-      Miss govt updates: 1: Citizen
-      Feel uninformed: 2: Citizen
+      Check La Gaceta manually: 1: NGO Staff
+      Spend 2 hours reading: 2: NGO Staff
+      Miss important decrees: 1: NGO Staff
+      React too late: 2: NGO Staff
     section With GacetaChat
-      Wake up: 3: Citizen
-      Open gacetachat.cr: 5: Citizen
-      Read 5-bullet summary: 5: Citizen
-      Understand govt actions: 5: Citizen
-      Share with family: 5: Citizen
-      Feel informed: 5: Citizen
+      Receive WhatsApp alert: 5: NGO Staff
+      Read 30-second summary: 5: NGO Staff
+      Identify SINAC policy change: 5: NGO Staff
+      Draft response same day: 5: NGO Staff
+      Amplify to media partners: 5: NGO Staff
+      Citizens learn about issue: 5: Citizens
+      Democracy strengthened: 5: Society
 ```
 
 ---
@@ -389,7 +402,9 @@ Old prototype code moved to `/archive/v1/`:
 **Status:** Planning → Funding → Building → Launching
 **Timeline:** 4 weeks to launch (AI-accelerated with Claude Code Plus)
 **Cost:** $30k to build, $1.5k/year to run
-**Impact:** Democracy for 3.5M Costa Ricans
+**Impact:** Empowering NGOs to strengthen Costa Rican democracy
 **Efficiency:** 52% cheaper, 60% faster than traditional development
 
-Made with ❤️ for democratic transparency 🇨🇷
+**Not a startup. Not an app. Public democratic infrastructure.**
+
+Made with ❤️ for civil society and democracy 🇨🇷

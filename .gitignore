@@ -28,6 +28,7 @@ download.log
 *.log
 *.faiss
 *.pkl
+data/ngo_signups.json  # NGO signup form data (sensitive)
 
 # Environment & Secrets
 .env
