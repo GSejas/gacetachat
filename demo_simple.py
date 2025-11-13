@@ -94,6 +94,9 @@ else:
 # Initialize session state for selected date
 if 'selected_date' not in st.session_state:
     st.session_state.selected_date = default_date
+# Validate session state is within valid range
+elif st.session_state.selected_date < min_date or st.session_state.selected_date > max_date:
+    st.session_state.selected_date = default_date
 
 # Date navigation with large centered display
 nav_col1, nav_col2, nav_col3 = st.columns([1, 3, 1])
