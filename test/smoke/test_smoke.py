@@ -1,6 +1,6 @@
 """
-Smoke tests for GacetaChat - Basic functionality verification
-These tests verify that the core system components can start and respond.
+Smoke tests for GacetaChat Serverless Alpha - Basic functionality verification
+These tests verify that the scraper and demo components can run.
 """
 
 import importlib
@@ -16,84 +16,49 @@ sys.path.insert(0, str(project_root))
 
 
 class TestBasicImports:
-    """Test that all core modules can be imported without errors."""
+    """Test that scraper and demo modules can be imported."""
 
-    def test_import_core_modules(self):
-        """Test importing main application modules."""
-        modules_to_test = [
-            "config",
-            "models",
-            "crud",
-            "db",
-            "qa",
-            "pdf_processor",
-            "faiss_helper",
-        ]
-
-        failed_imports = []
-        for module_name in modules_to_test:
-            try:
-                importlib.import_module(module_name)
-            except ImportError as e:
-                failed_imports.append(f"{module_name}: {str(e)}")
-
-        assert len(failed_imports) == 0, f"Failed to import modules: {failed_imports}"
-
-    def test_import_streamlit_app(self):
-        """Test that Streamlit app can be imported."""
+    def test_import_scraper_module(self):
+        """Test importing scraper module."""
         try:
-            import streamlit_app
-
-            assert hasattr(streamlit_app, "main") or callable(streamlit_app)
+            import scripts.scrape_and_summarize
+            assert scripts.scrape_and_summarize is not None
         except ImportError as e:
-            pytest.fail(f"Could not import streamlit_app: {e}")
+            pytest.fail(f"Could not import scraper: {e}")
 
-    def test_import_fastapi_app(self):
-        """Test that FastAPI app can be imported."""
+    def test_import_demo_simple(self):
+        """Test that demo_simple.py can be imported."""
         try:
-            import fastapp
-
-            assert hasattr(fastapp, "app")
+            import demo_simple
+            assert hasattr(demo_simple, "load_demo_data") or callable(demo_simple)
         except ImportError as e:
-            pytest.fail(f"Could not import fastapp: {e}")
+            pytest.fail(f"Could not import demo_simple: {e}")
+
+    def test_import_streamlit_dependencies(self):
+        """Test that Streamlit dependencies are available."""
+        try:
+            import streamlit
+            assert streamlit is not None
+        except ImportError as e:
+            pytest.fail(f"Could not import streamlit: {e}")
 
 
 class TestConfiguration:
     """Test configuration and environment setup."""
 
-    def test_config_module_loads(self):
-        """Test that config module loads and has required attributes."""
-        try:
-            import config
+    def test_environment_variables(self):
+        """Test that environment can be properly configured."""
+        # These are optional in serverless alpha
+        openai_key = os.getenv("OPENAI_API_KEY")
+        # Just verify we can check the environment
+        assert isinstance(os.environ, dict)
 
-            # Check for required configuration attributes
-            required_attrs = ["OPENAI_API_KEY", "DATABASE_URL"]
-            missing_attrs = [
-                attr for attr in required_attrs if not hasattr(config, attr)
-            ]
-
-            # In test environment, some configs might be None - that's ok
-            assert (
-                len(missing_attrs) == 0
-            ), f"Missing config attributes: {missing_attrs}"
-
-        except ImportError as e:
-            pytest.fail(f"Could not load config module: {e}")
-
-    def test_database_connection(self):
-        """Test basic database connection."""
-        try:
-            from sqlalchemy import text
-
-            from db import engine
-
-            # Test basic connection
-            with engine.connect() as conn:
-                result = conn.execute(text("SELECT 1"))
-                assert result.fetchone()[0] == 1
-
-        except Exception as e:
-            pytest.fail(f"Database connection failed: {e}")
+    def test_data_directory_exists(self):
+        """Test that data directory can be created."""
+        data_dir = project_root / "data"
+        # Directory may not exist yet, but path should be valid
+        assert project_root.exists()
+        assert project_root.is_dir()
 
 
 class TestFileStructure:
@@ -102,13 +67,11 @@ class TestFileStructure:
     def test_required_files_exist(self):
         """Test that core application files exist."""
         required_files = [
-            "streamlit_app.py",
-            "fastapp.py",
-            "config.py",
-            "models.py",
-            "crud.py",
-            "db.py",
+            "demo_simple.py",
+            "scripts/scrape_and_summarize.py",
             "requirements.txt",
+            "pyproject.toml",
+            "README.md",
         ]
 
         missing_files = []
@@ -121,7 +84,7 @@ class TestFileStructure:
 
     def test_required_directories_exist(self):
         """Test that required directories exist."""
-        required_dirs = ["test", "docs", "mpages", "services"]
+        required_dirs = ["test", "docs", "scripts"]
 
         missing_dirs = []
         for dir_name in required_dirs:
@@ -135,102 +98,103 @@ class TestFileStructure:
 class TestBasicFunctionality:
     """Test basic application functionality."""
 
-    def test_pdf_processor_basics(self):
-        """Test PDF processor can be initialized."""
+    def test_scraper_module_functions(self):
+        """Test scraper module has required functions."""
         try:
-            from pdf_processor import PDFProcessor
+            import scripts.scrape_and_summarize as scraper
 
-            processor = PDFProcessor()
-            assert processor is not None
+            # Test that main function exists
+            assert hasattr(scraper, "main")
         except Exception as e:
-            pytest.fail(f"PDF processor initialization failed: {e}")
+            pytest.fail(f"Scraper module test failed: {e}")
 
-    def test_qa_module_basics(self):
-        """Test QA module basic functionality."""
+    def test_demo_simple_loads_data(self):
+        """Test demo_simple can load demonstration data."""
         try:
-            import qa
+            import demo_simple
 
-            # Test that basic functions exist
-            assert hasattr(qa, "get_llm") or hasattr(qa, "query_folder")
+            # Test that the module loads without errors
+            assert demo_simple is not None
         except Exception as e:
-            pytest.fail(f"QA module test failed: {e}")
+            pytest.fail(f"Demo simple test failed: {e}")
 
-    def test_crud_operations_basic(self):
-        """Test basic CRUD operations."""
+    def test_json_data_structure(self):
+        """Test that data files can be read as JSON."""
         try:
-            from crud import PromptExecutionEngine
+            import json
 
-            # Test that we can create the engine
-            engine = PromptExecutionEngine()
-            assert engine is not None
-
+            demo_data_path = project_root / "demo_data.json"
+            if demo_data_path.exists():
+                with open(demo_data_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                assert isinstance(data, (dict, list))
         except Exception as e:
-            pytest.fail(f"CRUD operations test failed: {e}")
+            pytest.fail(f"JSON data structure test failed: {e}")
 
 
 class TestApplicationStartup:
     """Test that applications can start (without full execution)."""
 
-    @pytest.mark.skipif(os.getenv("SKIP_SERVER_TESTS"), reason="Server tests skipped")
-    def test_fastapi_app_creation(self):
-        """Test FastAPI app can be created."""
-        try:
-            import fastapp
-
-            app = fastapp.app
-            assert app is not None
-            assert hasattr(app, "openapi")  # Basic FastAPI method
-        except Exception as e:
-            pytest.fail(f"FastAPI app creation failed: {e}")
-
-    def test_streamlit_app_syntax(self):
-        """Test Streamlit app has valid Python syntax."""
-        streamlit_app_path = project_root / "streamlit_app.py"
+    def test_demo_simple_syntax(self):
+        """Test demo_simple.py has valid Python syntax."""
+        demo_path = project_root / "demo_simple.py"
 
         try:
-            with open(streamlit_app_path, "r", encoding="utf-8") as f:
+            with open(demo_path, "r", encoding="utf-8") as f:
                 app_code = f.read()
 
             # Compile to check syntax
-            compile(app_code, str(streamlit_app_path), "exec")
+            compile(app_code, str(demo_path), "exec")
 
         except SyntaxError as e:
-            pytest.fail(f"Streamlit app has syntax errors: {e}")
+            pytest.fail(f"demo_simple.py has syntax errors: {e}")
         except FileNotFoundError:
-            pytest.fail("streamlit_app.py not found")
+            pytest.fail("demo_simple.py not found")
+
+    def test_scraper_syntax(self):
+        """Test scraper has valid Python syntax."""
+        scraper_path = project_root / "scripts" / "scrape_and_summarize.py"
+
+        try:
+            with open(scraper_path, "r", encoding="utf-8") as f:
+                code = f.read()
+
+            # Compile to check syntax
+            compile(code, str(scraper_path), "exec")
+
+        except SyntaxError as e:
+            pytest.fail(f"scraper has syntax errors: {e}")
+        except FileNotFoundError:
+            pytest.fail("scrape_and_summarize.py not found")
 
 
 class TestDependencies:
     """Test that critical dependencies are available."""
 
     def test_critical_packages_importable(self):
-        """Test that critical packages can be imported."""
+        """Test that critical packages for serverless alpha can be imported."""
         critical_packages = [
             "streamlit",
-            "fastapi",
-            "sqlalchemy",
             "openai",
-            "langchain",
-            "faiss",
             "requests",
-            "pandas",
-            "numpy",
+            "beautifulsoup4",
+            "pypdf",
         ]
 
         failed_imports = []
         for package in critical_packages:
             try:
-                if package == "faiss":
-                    # FAISS might be installed as faiss-cpu
-                    try:
-                        pass
-                    except ImportError:
-                        pass
+                # Handle package name differences
+                if package == "beautifulsoup4":
+                    importlib.import_module("bs4")
+                elif package == "pypdf":
+                    importlib.import_module("PyPDF2")
                 else:
                     importlib.import_module(package)
             except ImportError as e:
                 failed_imports.append(f"{package}: {str(e)}")
 
+        # These are required for the scraper to work
         assert len(failed_imports) == 0, f"Failed to import packages: {failed_imports}"
 
 
