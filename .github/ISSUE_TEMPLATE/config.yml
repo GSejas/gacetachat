@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/GSejas/gacetachat/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📧 Email Contact
+    url: mailto:contact@gacetachat.cr
+    about: For private inquiries or sensitive matters
+  - name: 🌐 Live Demo
+    url: https://gacetachat.streamlit.app/
+    about: Try GacetaChat live on Streamlit Cloud
