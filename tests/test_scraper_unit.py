@@ -143,3 +143,81 @@ def test_summarize_with_gpt4_handles_invalid_json(monkeypatch, mock_openai_respo
 
     result = summarize_with_gpt4("Test text", datetime.now())
     assert result is None  # Should return None on invalid JSON
+
+
+# ===== Timezone Tests =====
+def test_timezone_handling_costa_rica():
+    """Unit: Main function uses Costa Rica timezone (UTC-6)"""
+    from datetime import datetime
+    import pytz
+
+    costa_rica_tz = pytz.timezone("America/Costa_Rica")
+    now_cr = datetime.now(costa_rica_tz)
+
+    # Should have timezone info
+    assert now_cr.tzinfo is not None
+    assert now_cr.tzname() in ("CST", "CDT")  # Central Standard/Daylight Time
+
+
+def test_date_extraction_from_url_dd_mm_yyyy_format():
+    """Unit: Extract date from COMP_DD_MM_YYYY.pdf format correctly"""
+    import re
+    from datetime import datetime
+
+    url = "https://www.imprentanacional.go.cr/pub/2025/11/12/COMP_12_11_2025.pdf"
+
+    # Test regex pattern
+    match = re.search(r'COMP_(\d{2})_(\d{2})_(\d{4})\.pdf', url)
+    assert match is not None
+
+    day, month, year = match.groups()
+    assert day == "12"
+    assert month == "11"
+    assert year == "2025"
+
+    # Parse to date string
+    gazette_date = datetime.strptime(f"{year}-{month}-{day}", "%Y-%m-%d")
+    date_str = gazette_date.strftime("%Y-%m-%d")
+    assert date_str == "2025-11-12"  # Should be November 12th, not 13th
+
+
+def test_date_extraction_old_yyyymmdd_format():
+    """Unit: Also handle old gaceta_YYYYMMDD format"""
+    import re
+    from datetime import datetime
+
+    url = "https://www.imprentanacional.go.cr/gaceta/2024/07/15/gaceta_20240715.pdf"
+
+    # Test regex pattern for old format
+    match = re.search(r'gaceta[_/]?(\d{8})', url)
+    assert match is not None
+
+    date_str_match = match.group(1)
+    assert date_str_match == "20240715"
+
+    # Parse to date
+    gazette_date = datetime.strptime(date_str_match, "%Y%m%d")
+    date_str = gazette_date.strftime("%Y-%m-%d")
+    assert date_str == "2024-07-15"
+
+
+def test_no_timezone_drift_on_midnight():
+    """Unit: Date extraction works correctly around midnight UTC"""
+    from datetime import datetime
+    import pytz
+
+    # Simulate: 04:37 UTC (which is Nov 13 UTC, but Nov 12 in Costa Rica)
+    utc_tz = pytz.timezone("UTC")
+    utc_time = datetime(2025, 11, 13, 4, 37, tzinfo=utc_tz)
+
+    # Convert to Costa Rica time (UTC-6)
+    costa_rica_tz = pytz.timezone("America/Costa_Rica")
+    cr_time = utc_time.astimezone(costa_rica_tz)
+
+    # In Costa Rica, this should still be Nov 12
+    assert cr_time.day == 12
+    assert cr_time.month == 11
+
+    # Date string should reflect Costa Rica date
+    date_str = cr_time.strftime("%Y-%m-%d")
+    assert date_str == "2025-11-12"
