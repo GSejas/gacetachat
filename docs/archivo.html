@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archivo - GacetaChat | Resúmenes IA de La Gaceta</title>
+    <meta name="description" content="Archivo completo de resúmenes diarios de La Gaceta Oficial de Costa Rica generados con IA.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1F2937;
+            background: #F9FAFB;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .search-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 0.5rem 1rem;
+            background: #F3F4F6;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-chip:hover {
+            background: #E5E7EB;
+        }
+
+        .filter-chip.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .summary-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #F3F4F6;
+        }
+
+        .summary-date {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .summary-topics {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .topic-tag {
+            padding: 0.25rem 0.75rem;
+            background: #F3F4F6;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            color: #6B7280;
+        }
+
+        .summary-text {
+            margin: 1rem 0;
+            color: #4B5563;
+            font-size: 1.1rem;
+        }
+
+        .bullets {
+            margin: 1.5rem 0;
+        }
+
+        .bullet-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #F9FAFB;
+            border-radius: 8px;
+        }
+
+        .bullet-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .bullet-text {
+            flex: 1;
+            color: #374151;
+        }
+
+        .bullet-pages {
+            color: #9CA3AF;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .summary-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #E5E7EB;
+            font-size: 0.875rem;
+            color: #6B7280;
+        }
+
+        .pdf-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .pdf-link:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6B7280;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #6B7280;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #6B7280;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .summary-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .summary-topics {
+                margin-top: 0.5rem;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>🇨🇷 GacetaChat - Archivo</h1>
+            <p>Resúmenes diarios de La Gaceta Oficial generados con IA</p>
+            <div class="nav-links">
+                <a href="index.html">🏠 Inicio</a>
+                <a href="https://gacetachat.streamlit.app/" target="_blank">🚀 Demo en Vivo</a>
+                <a href="https://github.com/GSejas/gacetachat" target="_blank">📖 GitHub</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="search-box">
+            <input type="text" 
+                   id="searchInput" 
+                   class="search-input" 
+                   placeholder="🔍 Buscar por palabras clave... (ej: 'salud', 'fiscal', 'educación')">
+            <div class="filters" id="topicFilters"></div>
+        </div>
+
+        <div class="stats-bar">
+            <div>
+                <strong id="totalCount">0</strong> resúmenes disponibles
+                <span id="filteredCount"></span>
+            </div>
+            <div id="dateRange"></div>
+        </div>
+
+        <div id="summariesContainer" class="loading">
+            ⏳ Cargando resúmenes...
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>📖 Código abierto | 🇨🇷 Hecho en Costa Rica | ❤️ Para la democracia</p>
+        <p style="margin-top: 0.5rem;">
+            <a href="https://github.com/GSejas/gacetachat" style="color: #667eea;">GitHub</a>
+        </p>
+    </div>
+
+    <script>
+        let allSummaries = [];
+        let currentFilter = null;
+
+        async function loadSummaries() {
+            try {
+                const response = await fetch('../data/summaries.json');
+                const data = await response.json();
+                
+                // Convert to array and sort by date (newest first)
+                allSummaries = Object.entries(data)
+                    .map(([date, summary]) => ({...summary, date}))
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                displayStats();
+                createTopicFilters();
+                displaySummaries();
+            } catch (error) {
+                document.getElementById('summariesContainer').innerHTML = `
+                    <div class="no-results">
+                        ❌ Error al cargar los resúmenes. Por favor intenta más tarde.
+                    </div>
+                `;
+                console.error('Error loading summaries:', error);
+            }
+        }
+
+        function displayStats() {
+            const count = allSummaries.length;
+            document.getElementById('totalCount').textContent = count;
+            
+            if (count > 0) {
+                const dates = allSummaries.map(s => new Date(s.date));
+                const newest = dates[0];
+                const oldest = dates[dates.length - 1];
+                document.getElementById('dateRange').textContent = 
+                    `${formatDate(oldest)} - ${formatDate(newest)}`;
+            }
+        }
+
+        function createTopicFilters() {
+            const allTopics = new Set();
+            allSummaries.forEach(summary => {
+                if (summary.topics) {
+                    summary.topics.forEach(topic => allTopics.add(topic));
+                }
+            });
+
+            const filtersContainer = document.getElementById('topicFilters');
+            const sortedTopics = Array.from(allTopics).sort();
+            
+            sortedTopics.forEach(topic => {
+                const chip = document.createElement('button');
+                chip.className = 'filter-chip';
+                chip.textContent = topic;
+                chip.onclick = () => toggleFilter(topic, chip);
+                filtersContainer.appendChild(chip);
+            });
+        }
+
+        function toggleFilter(topic, chipElement) {
+            // Toggle active state
+            const chips = document.querySelectorAll('.filter-chip');
+            if (currentFilter === topic) {
+                currentFilter = null;
+                chipElement.classList.remove('active');
+            } else {
+                chips.forEach(c => c.classList.remove('active'));
+                currentFilter = topic;
+                chipElement.classList.add('active');
+            }
+            displaySummaries();
+        }
+
+        function displaySummaries() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            let filtered = allSummaries.filter(summary => {
+                // Apply topic filter
+                if (currentFilter && (!summary.topics || !summary.topics.includes(currentFilter))) {
+                    return false;
+                }
+                
+                // Apply search filter
+                if (searchTerm) {
+                    const searchableText = [
+                        summary.summary || '',
+                        ...(summary.bullets || []).map(b => b.text || ''),
+                        ...(summary.topics || [])
+                    ].join(' ').toLowerCase();
+                    
+                    return searchableText.includes(searchTerm);
+                }
+                
+                return true;
+            });
+
+            const container = document.getElementById('summariesContainer');
+            const filteredCountEl = document.getElementById('filteredCount');
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        😕 No se encontraron resúmenes con esos criterios.
+                    </div>
+                `;
+                filteredCountEl.textContent = '';
+                return;
+            }
+
+            if (filtered.length < allSummaries.length) {
+                filteredCountEl.textContent = `(mostrando ${filtered.length})`;
+            } else {
+                filteredCountEl.textContent = '';
+            }
+
+            container.innerHTML = filtered.map(summary => createSummaryCard(summary)).join('');
+        }
+
+        function createSummaryCard(summary) {
+            const bullets = (summary.bullets || []).map(bullet => `
+                <div class="bullet-item">
+                    <div class="bullet-icon">${bullet.icon || '•'}</div>
+                    <div>
+                        <div class="bullet-text">${bullet.text}</div>
+                        ${bullet.pages ? `<div class="bullet-pages">📄 Páginas: ${bullet.pages.join(', ')}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            const topics = (summary.topics || []).map(topic => 
+                `<span class="topic-tag">${topic}</span>`
+            ).join('');
+
+            return `
+                <div class="summary-card">
+                    <div class="summary-header">
+                        <div class="summary-date">${formatDateFull(summary.date)}</div>
+                        <div class="summary-topics">${topics}</div>
+                    </div>
+                    <div class="summary-text">${summary.summary}</div>
+                    <div class="bullets">${bullets}</div>
+                    <div class="summary-footer">
+                        <div>
+                            ${summary.model ? `🤖 ${summary.model}` : ''}
+                            ${summary.api_cost_usd ? ` | 💰 $${summary.api_cost_usd}` : ''}
+                        </div>
+                        <a href="${summary.pdf_url}" target="_blank" class="pdf-link">
+                            📄 Ver PDF Original →
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('es-CR', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function formatDateFull(dateStr) {
+            const date = new Date(dateStr + 'T00:00:00');
+            return date.toLocaleDateString('es-CR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Debounced search
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(displaySummaries, 300);
+        });
+
+        // Load on page load
+        loadSummaries();
+    </script>
+</body>
+</html>
