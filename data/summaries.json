@@ -55,5 +55,64 @@
     "date": "2025-11-12",
     "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/12/COMP_12_11_2025.pdf",
     "generated_at": "2025-11-13T05:30:24.373532"
+  },
+  "2025-11-13": {
+    "summary": "La Gaceta Oficial del 13 de noviembre de 2025 presenta importantes actualizaciones en materia fiscal, regulaciones de competencia y ajustes en precios de bienes esenciales como el calzado escolar.",
+    "bullets": [
+      {
+        "icon": "⚖️",
+        "text": "Se corrige un aviso de audiencia pública relacionado con la solicitud de la compañía Feran Aerofoto, afectando el inicio de un emplazamiento.",
+        "pages": [
+          2
+        ]
+      },
+      {
+        "icon": "💰",
+        "text": "El precio máximo al consumidor del calzado escolar se actualiza a ¢15.094,00, aplicable a partir del 1° de enero de 2026.",
+        "pages": [
+          3
+        ]
+      },
+      {
+        "icon": "♻️",
+        "text": "La COPROCOM emite opiniones sobre el impacto de regulaciones en la competencia del mercado de gestión de residuos sólidos, destacando barreras de entrada.",
+        "pages": [
+          4
+        ]
+      },
+      {
+        "icon": "📜",
+        "text": "Se establece que la Dirección General de Hacienda actualizará anualmente el precio máximo del calzado escolar, considerando el IPC.",
+        "pages": [
+          3
+        ]
+      },
+      {
+        "icon": "🚨",
+        "text": "Se omite la audiencia pública previa para la actualización del precio del calzado escolar debido a razones de interés público y urgencia.",
+        "pages": [
+          3
+        ]
+      }
+    ],
+    "topics": [
+      "Legal",
+      "Fiscal",
+      "Competencia",
+      "Salud",
+      "Educación"
+    ],
+    "prompt_version": "2.0.0",
+    "model": "gpt-5-mini",
+    "api_cost_usd": 0.0017,
+    "tokens": {
+      "input": 4197,
+      "output": 350,
+      "total": 4547
+    },
+    "date": "2025-11-13",
+    "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/13/COMP_13_11_2025.pdf",
+    "generated_at": "2025-11-13T06:01:03.963043",
+    "header_image": "header_images/2025-11-13.jpg"
   }
 }
