@@ -114,5 +114,64 @@
     "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/13/COMP_13_11_2025.pdf",
     "generated_at": "2025-11-13T06:01:03.963043",
     "header_image": "header_images/2025-11-13.jpg"
+  },
+  "2025-11-14": {
+    "summary": "La Gaceta Oficial del 14 de noviembre de 2025 presenta importantes cambios en regulaciones municipales, acuerdos legislativos y modificaciones en incentivos para empresas de zonas francas.",
+    "bullets": [
+      {
+        "icon": "🏛️",
+        "text": "La Municipalidad de Goicoechea revoca la publicación anterior del reglamento de cementerios y aprueba un nuevo reglamento sobre tramitación de denuncias y documentos confidenciales.",
+        "pages": [
+          2
+        ]
+      },
+      {
+        "icon": "🏖️",
+        "text": "Se publica el artículo D del Reglamento del Plan Regulador Costero de Playa Brasilito, que establece normas para la zona residencial local, incluyendo usos permitidos y requisitos de construcción.",
+        "pages": [
+          3
+        ]
+      },
+      {
+        "icon": "📜",
+        "text": "La Asamblea Legislativa cierra el Primer Período de Sesiones Ordinarias de la Cuarta Legislatura 2025-2026, efectivo desde el 31 de octubre de 2025.",
+        "pages": [
+          3
+        ]
+      },
+      {
+        "icon": "💼",
+        "text": "Se modifica el Acuerdo Ejecutivo Nº 117-2021 para la empresa Beyondexpect Technology, extendiendo el plazo para cumplir con la inversión mínima requerida en el régimen de zonas francas.",
+        "pages": [
+          4
+        ]
+      },
+      {
+        "icon": "⚠️",
+        "text": "La Comisión Nacional de Prevención de Riesgos y Atención de Emergencias toma decisiones sobre la gestión de riesgos, aunque los detalles específicos no se presentan en este extracto.",
+        "pages": [
+          5
+        ]
+      }
+    ],
+    "topics": [
+      "Legal",
+      "Municipal",
+      "Regulación",
+      "Zonas Francas",
+      "Prevención de Riesgos"
+    ],
+    "prompt_version": "2.0.0",
+    "model": "gpt-5-mini",
+    "api_cost_usd": 0.0019,
+    "tokens": {
+      "input": 4312,
+      "output": 394,
+      "total": 4706
+    },
+    "date": "2025-11-14",
+    "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/14/COMP_14_11_2025.pdf",
+    "generated_at": "2025-11-14T12:15:39.140567",
+    "header_image": "header_images/2025-11-14.jpg"
   }
 }
