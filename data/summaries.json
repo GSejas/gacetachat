@@ -173,5 +173,63 @@
     "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/14/COMP_14_11_2025.pdf",
     "generated_at": "2025-11-14T12:15:39.140567",
     "header_image": "header_images/2025-11-14.jpg"
+  },
+  "2025-11-17": {
+    "summary": "La Gaceta Oficial del 17 de noviembre de 2025 presenta importantes modificaciones en el ámbito laboral, fiscal y de competencia, así como la convocatoria para la elección de directores en el Consejo Nacional de Salarios.",
+    "bullets": [
+      {
+        "icon": "⚖️",
+        "text": "Se modifica el artículo 1° del Acuerdo N° 17-2016, delegando la firma del Ministro de Trabajo para transferencias de recursos a instituciones sociales.",
+        "pages": [
+          2
+        ]
+      },
+      {
+        "icon": "💼",
+        "text": "Se insta a asociaciones y sindicatos a enviar candidatos para el Consejo Nacional de Salarios, cuyo plazo vence el 31 de diciembre de 2025.",
+        "pages": [
+          3
+        ]
+      },
+      {
+        "icon": "🌐",
+        "text": "Se autoriza la participación de un funcionario en el Congreso Internacional sobre Derecho de la Competencia en República Dominicana, con financiamiento de viáticos.",
+        "pages": [
+          3
+        ]
+      },
+      {
+        "icon": "📜",
+        "text": "Se publican solicitudes de inscripción de marcas comerciales, incluyendo servicios educativos y productos alimenticios.",
+        "pages": [
+          4
+        ]
+      },
+      {
+        "icon": "🔍",
+        "text": "Se establece un plazo para que terceros defiendan sus derechos sobre las solicitudes de marcas publicadas en el Registro Nacional.",
+        "pages": [
+          4
+        ]
+      }
+    ],
+    "topics": [
+      "Legal",
+      "Laboral",
+      "Competencia",
+      "Comercio"
+    ],
+    "prompt_version": "2.0.0",
+    "model": "gpt-5-mini",
+    "api_cost_usd": 0.0018,
+    "tokens": {
+      "input": 4349,
+      "output": 340,
+      "total": 4689
+    },
+    "date": "2025-11-17",
+    "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/17/COMP_17_11_2025.pdf",
+    "generated_at": "2025-11-17T12:14:55.816897",
+    "header_image": "header_images/2025-11-17.jpg"
   }
 }
