@@ -231,5 +231,62 @@
     "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/17/COMP_17_11_2025.pdf",
     "generated_at": "2025-11-17T12:14:55.816897",
     "header_image": "header_images/2025-11-17.jpg"
+  },
+  "2025-11-18": {
+    "summary": "La Gaceta Oficial del 18 de noviembre de 2025 presenta importantes modificaciones en el régimen de zonas francas y la contratación pública en Costa Rica, así como requerimientos para el alquiler de edificaciones para el Ministerio de Seguridad Pública.",
+    "bullets": [
+      {
+        "icon": "⚖️",
+        "text": "Se modifica el Acuerdo Ejecutivo N° 0441-2024, estableciendo un nivel mínimo de empleo de 250 trabajadores para la empresa GRUPO VARGAS G V S. A.",
+        "pages": [
+          2
+        ]
+      },
+      {
+        "icon": "💰",
+        "text": "La empresa deberá mantener una inversión mínima de US$ 8.425.244,42, incluyendo inversiones adicionales en activos fijos nuevos.",
+        "pages": [
+          2
+        ]
+      },
+      {
+        "icon": "📈",
+        "text": "Se establece que PROCOMER vigilará el cumplimiento de los niveles de inversión y podrá revocar el régimen de zonas francas si no se cumplen.",
+        "pages": [
+          3
+        ]
+      },
+      {
+        "icon": "🏢",
+        "text": "El Ministerio de Seguridad Pública busca alquilar un edificio en Puntarenas, con requisitos específicos para su construcción y adecuación.",
+        "pages": [
+          4
+        ]
+      },
+      {
+        "icon": "📜",
+        "text": "Se detallan las condiciones legales que deben cumplir los oferentes para el alquiler del inmueble, incluyendo normativas de accesibilidad y construcción.",
+        "pages": [
+          4
+        ]
+      }
+    ],
+    "topics": [
+      "Legal",
+      "Fiscal",
+      "Seguridad Pública"
+    ],
+    "prompt_version": "2.0.0",
+    "model": "gpt-5-mini",
+    "api_cost_usd": 0.0018,
+    "tokens": {
+      "input": 4209,
+      "output": 356,
+      "total": 4565
+    },
+    "date": "2025-11-18",
+    "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/18/COMP_18_11_2025.pdf",
+    "generated_at": "2025-11-18T12:14:18.263309",
+    "header_image": "header_images/2025-11-18.jpg"
   }
 }
