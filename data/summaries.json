@@ -288,5 +288,62 @@
     "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/18/COMP_18_11_2025.pdf",
     "generated_at": "2025-11-18T12:14:18.263309",
     "header_image": "header_images/2025-11-18.jpg"
+  },
+  "2025-11-19": {
+    "summary": "La Gaceta Oficial del 19 de noviembre de 2025 presenta varios anuncios importantes relacionados con el ámbito ambiental, fiscal y judicial en Costa Rica, destacando cambios en regulaciones y acuerdos gubernamentales.",
+    "bullets": [
+      {
+        "icon": "🌳",
+        "text": "Se aprobó un nuevo acuerdo del Ministerio de Ambiente y Energía para la protección de áreas naturales, promoviendo la conservación y uso sostenible de la biodiversidad.",
+        "pages": [
+          7
+        ]
+      },
+      {
+        "icon": "💼",
+        "text": "Se implementaron cambios en la Ley de Biodiversidad, fortaleciendo las regulaciones sobre el uso de recursos naturales y la protección de especies en peligro.",
+        "pages": [
+          7
+        ]
+      },
+      {
+        "icon": "⚖️",
+        "text": "El Poder Judicial anunció la creación de un nuevo sistema de gestión de casos para mejorar la eficiencia en la administración de justicia.",
+        "pages": [
+          44
+        ]
+      },
+      {
+        "icon": "💰",
+        "text": "Se publicaron nuevas resoluciones fiscales que afectan a las instituciones descentralizadas, buscando optimizar el uso de recursos públicos.",
+        "pages": [
+          55
+        ]
+      },
+      {
+        "icon": "📜",
+        "text": "El Tribunal Supremo de Elecciones emitió acuerdos sobre la regulación de campañas electorales, estableciendo nuevas normativas para el próximo proceso electoral.",
+        "pages": [
+          47
+        ]
+      }
+    ],
+    "topics": [
+      "Ambiente",
+      "Fiscal",
+      "Judicial"
+    ],
+    "prompt_version": "2.0.0",
+    "model": "gpt-5-mini",
+    "api_cost_usd": 0.0018,
+    "tokens": {
+      "input": 4351,
+      "output": 338,
+      "total": 4689
+    },
+    "date": "2025-11-19",
+    "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/19/COMP_19_11_2025.pdf",
+    "generated_at": "2025-11-19T12:14:17.169515",
+    "header_image": "header_images/2025-11-19.jpg"
   }
 }
