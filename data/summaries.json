@@ -345,5 +345,64 @@
     "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/19/COMP_19_11_2025.pdf",
     "generated_at": "2025-11-19T12:14:17.169515",
     "header_image": "header_images/2025-11-19.jpg"
+  },
+  "2025-11-20": {
+    "summary": "La Gaceta Oficial del 20 de noviembre de 2025 presenta varios anuncios importantes relacionados con legislación, registros de productos y marcas, así como la apertura de un nuevo período de sesiones extraordinarias.",
+    "bullets": [
+      {
+        "icon": "📜",
+        "text": "Se declara abierto el Segundo Período de Sesiones Extraordinarias de la Cuarta Legislatura 2025-2026, que rige desde el 1° de noviembre de 2025.",
+        "pages": [
+          2
+        ]
+      },
+      {
+        "icon": "🌱",
+        "text": "Se publica la solicitud de registro de un agroquímico, TRI-CLOR 99.6 TC, que debe ser revisada por terceros interesados en un plazo de diez días hábiles.",
+        "pages": [
+          2
+        ]
+      },
+      {
+        "icon": "🐾",
+        "text": "Se registra un nuevo producto veterinario, Beaphar Toothgel, que debe cumplir con el Reglamento Técnico Centroamericano para su aprobación.",
+        "pages": [
+          3
+        ]
+      },
+      {
+        "icon": "💼",
+        "text": "Se publican varias solicitudes de registro de marcas, incluyendo servicios financieros y productos de ejercicio, que están abiertas a oposiciones por parte de terceros.",
+        "pages": [
+          3,
+          4
+        ]
+      },
+      {
+        "icon": "⚖️",
+        "text": "Se establece un plazo de dos meses para que terceros interesados puedan oponerse a las solicitudes de registro de marcas y nombres comerciales presentadas.",
+        "pages": [
+          4
+        ]
+      }
+    ],
+    "topics": [
+      "Legal",
+      "Agricultura",
+      "Veterinaria",
+      "Comercio"
+    ],
+    "prompt_version": "2.0.0",
+    "model": "gpt-5-mini",
+    "api_cost_usd": 0.0019,
+    "tokens": {
+      "input": 4431,
+      "output": 373,
+      "total": 4804
+    },
+    "date": "2025-11-20",
+    "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/20/COMP_20_11_2025.pdf",
+    "generated_at": "2025-11-20T12:14:43.977361",
+    "header_image": "header_images/2025-11-20.jpg"
   }
 }
