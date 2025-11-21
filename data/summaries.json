@@ -404,5 +404,63 @@
     "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/20/COMP_20_11_2025.pdf",
     "generated_at": "2025-11-20T12:14:43.977361",
     "header_image": "header_images/2025-11-20.jpg"
+  },
+  "2025-11-21": {
+    "summary": "La Gaceta Oficial del 21 de noviembre de 2025 presenta importantes cambios en la administración pública, incluyendo nombramientos, correcciones de errores y solicitudes de registro de productos.",
+    "bullets": [
+      {
+        "icon": "⚖️",
+        "text": "Corrección de error en la publicación de naturalización del expediente Nº 3386-2025, donde se rectifica el nombre de una persona.",
+        "pages": [
+          2
+        ]
+      },
+      {
+        "icon": "📜",
+        "text": "Reelección de José Eduardo Bedoya Benítez como miembro de la Comisión Nacional de Nomenclatura por un nuevo período de seis años.",
+        "pages": [
+          3
+        ]
+      },
+      {
+        "icon": "✈️",
+        "text": "Autorización para que la Coordinadora del Nivel de Atención Penal Juvenil participe en un encuentro regional en Guatemala, con gastos cubiertos por el SICA.",
+        "pages": [
+          3
+        ]
+      },
+      {
+        "icon": "📄",
+        "text": "Solicitud de patente de corredor jurado por parte de Alexandra Arias, con un plazo para objeciones de 15 días hábiles.",
+        "pages": [
+          3
+        ]
+      },
+      {
+        "icon": "🌱",
+        "text": "Varias solicitudes de registro de productos agroquímicos y veterinarios, con plazos para oposiciones establecidos.",
+        "pages": [
+          4
+        ]
+      }
+    ],
+    "topics": [
+      "Legal",
+      "Administración Pública",
+      "Salud",
+      "Agricultura"
+    ],
+    "prompt_version": "2.0.0",
+    "model": "gpt-5-mini",
+    "api_cost_usd": 0.0018,
+    "tokens": {
+      "input": 4468,
+      "output": 343,
+      "total": 4811
+    },
+    "date": "2025-11-21",
+    "pdf_url": "https://www.imprentanacional.go.cr/pub/2025/11/21/COMP_21_11_2025.pdf",
+    "generated_at": "2025-11-21T12:14:06.420155",
+    "header_image": "header_images/2025-11-21.jpg"
   }
 }
