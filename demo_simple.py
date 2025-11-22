@@ -44,19 +44,238 @@ def load_demo_data():
 st.set_page_config(
     page_title="GacetaChat - Demo",
     page_icon="📰",
-    layout="centered"
+    layout="centered",
+    initial_sidebar_state="expanded"
 )
+
+# Sidebar: Language selector and theme toggle
+with st.sidebar:
+    st.header("⚙️ Settings")
+
+    # Language selector
+    lang = st.selectbox(
+        "🌐 Language / Idioma",
+        options=["es", "en"],
+        format_func=lambda x: {"es": "🇨🇷 Español", "en": "🇺🇸 English"}[x],
+        key="language"
+    )
+
+    # Theme toggle
+    theme = st.selectbox(
+        "🎨 Theme / Tema",
+        options=["light", "dark"],
+        format_func=lambda x: {"light": "☀️ Light / Claro", "dark": "🌙 Dark / Oscuro"}[x],
+        key="theme"
+    )
+
+    # Apply theme CSS
+    st.markdown("""
+    <style>
+        /* Costa Rican color palette */
+        :root {
+            --cr-blue: #002B7F;
+            --cr-red: #CE1126;
+            --cr-white: #FFFFFF;
+            --light-bg: #F8F9FA;
+            --dark-bg: #0E1117;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Theme-specific colors */
+        """ + ("""
+        .stApp {
+            background-color: var(--dark-bg);
+            color: #FAFAFA;
+        }
+        .bullet-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid var(--cr-blue);
+        }
+        .bullet-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(206, 17, 38, 0.2);
+        }
+        """ if theme == "dark" else """
+        .stApp {
+            background-color: var(--light-bg);
+        }
+        .bullet-card {
+            background: white;
+            border-left: 4px solid var(--cr-blue);
+        }
+        .bullet-card:hover {
+            background: #F0F7FF;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+        """) + """
+
+        /* Header image styling */
+        .header-image-container {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px var(--shadow);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 43, 127, 0.1);
+        }
+
+        /* Bullet point cards */
+        .bullet-card {
+            padding: 1rem 1.25rem;
+            margin: 0.75rem 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .bullet-icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .bullet-text {
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 1.6;
+        }
+
+        .bullet-pages {
+            color: var(--cr-blue);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        /* Topic badges */
+        .topic-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--cr-blue) 0%, #0047AB 100%);
+            color: white;
+            padding: 0.4rem 1rem;
+            margin: 0.3rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 43, 127, 0.2);
+            transition: transform 0.2s ease;
+        }
+
+        .topic-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 43, 127, 0.3);
+        }
+
+        /* Date navigation */
+        .date-header {
+            text-align: center;
+            color: var(--cr-blue);
+            margin: 1rem 0;
+            font-weight: 700;
+            font-size: 2rem;
+        }
+
+        /* Section headers */
+        h3 {
+            color: var(--cr-blue) !important;
+            font-weight: 600;
+            margin-top: 2rem !important;
+            margin-bottom: 1rem !important;
+        }
+
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Primary buttons (Costa Rican blue) */
+        .stButton > button[kind="primary"] {
+            background: linear-gradient(135deg, var(--cr-blue) 0%, #0047AB 100%);
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .stButton > button[kind="primary"]:hover {
+            box-shadow: 0 4px 16px rgba(0, 43, 127, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Info/success boxes */
+        .stAlert {
+            border-radius: 8px;
+            border-left: 4px solid var(--cr-blue);
+        }
+
+        /* Dividers */
+        hr {
+            margin: 2rem 0;
+            opacity: 0.2;
+        }
+
+        /* Expander styling */
+        .streamlit-expanderHeader {
+            font-weight: 600;
+            color: var(--cr-blue);
+        }
+
+        /* Form styling */
+        .stTextInput > div > div > input,
+        .stSelectbox > div > div > select,
+        .stTextArea > div > div > textarea {
+            border-radius: 6px;
+            border: 1px solid rgba(0, 43, 127, 0.2);
+        }
+
+        .stTextInput > div > div > input:focus,
+        .stSelectbox > div > div > select:focus,
+        .stTextArea > div > div > textarea:focus {
+            border-color: var(--cr-blue);
+            box-shadow: 0 0 0 2px rgba(0, 43, 127, 0.1);
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Translations for UI text
+TRANSLATIONS = {
+    "es": {
+        "title": "GacetaChat",
+        "caption_live": "🟢 Resúmenes diarios de La Gaceta Oficial - Generados con IA",
+        "caption_demo": "🟡 Demo con datos de ejemplo - Versión Alpha próximamente",
+        "what_is": "¿Qué es GacetaChat?",
+        "summary": "Resumen",
+        "key_points": "Puntos Clave",
+        "topics": "Temas",
+        "open_pdf": "Abrir PDF Original",
+        "go_to_gaceta": "Ir a La Gaceta"
+    },
+    "en": {
+        "title": "GacetaChat",
+        "caption_live": "🟢 Daily summaries of La Gaceta Oficial - AI Generated",
+        "caption_demo": "🟡 Demo with sample data - Alpha version coming soon",
+        "what_is": "What is GacetaChat?",
+        "summary": "Summary",
+        "key_points": "Key Points",
+        "topics": "Topics",
+        "open_pdf": "Open Original PDF",
+        "go_to_gaceta": "Go to La Gaceta"
+    }
+}
+
+def t(key):
+    """Get translated text for current language"""
+    return TRANSLATIONS[lang].get(key, TRANSLATIONS["es"][key])
 
 # Load data
 demo_data, is_live = load_demo_data()
 available_dates = sorted([datetime.strptime(d, "%Y-%m-%d").date() for d in demo_data.keys()], reverse=True)
 
 # Title
-st.title("🇨🇷 GacetaChat")
+st.title(f"🇨🇷 {t('title')}")
 if is_live:
-    st.caption("🟢 Resúmenes diarios de La Gaceta Oficial - Generados con IA")
+    st.caption(t('caption_live'))
 else:
-    st.caption("🟡 Demo con datos de ejemplo - Versión Alpha próximamente")
+    st.caption(t('caption_demo'))
 
 # What is La Gaceta? - Prominent onboarding (NGO-focused)
 with st.expander("📖 ¿Qué es GacetaChat?", expanded=True):
@@ -158,26 +377,56 @@ if day_data:
     if "header_image" in day_data:
         header_path = Path(__file__).parent / "data" / day_data["header_image"]
         if header_path.exists():
+            st.markdown('<div class="header-image-container">', unsafe_allow_html=True)
             st.image(str(header_path), use_container_width=True, caption="La Gaceta Oficial")
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    # Get summary in selected language (fallback to Spanish if English not available)
+    if lang in day_data:
+        summary = day_data[lang]
+    elif "es" in day_data:
+        summary = day_data["es"]
+    else:
+        # Old format (pre-bilingual) - use as-is
+        summary = day_data
 
     # Real data from demo_data.json
-    st.subheader(f"📋 Resumen - {selected_date.strftime('%d de %B, %Y')}")
-    st.write(day_data["summary"])
+    st.subheader(f"📋 {t('summary')} - {selected_date.strftime('%d de %B, %Y')}")
+    st.write(summary.get("summary", summary))
 
-    st.markdown("### 📌 Puntos Clave:")
-    for bullet in day_data["bullets"]:
+    st.markdown(f"### 📌 {t('key_points')}:")
+    bullets = summary.get("bullets", day_data.get("bullets", []))
+    for bullet in bullets:
         # Include page references if available (for transparency)
         if "pages" in bullet and bullet["pages"]:
             pages_str = ", ".join([f"p.{p}" for p in bullet["pages"]])
-            st.markdown(f"**{bullet['icon']}** {bullet['text']} *({pages_str})*")
+            st.markdown(f"""
+            <div class="bullet-card">
+                <span class="bullet-icon">{bullet['icon']}</span>
+                <span class="bullet-text">{bullet['text']}</span>
+                <span class="bullet-pages">({pages_str})</span>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.markdown(f"**{bullet['icon']}** {bullet['text']}")
+            st.markdown(f"""
+            <div class="bullet-card">
+                <span class="bullet-icon">{bullet['icon']}</span>
+                <span class="bullet-text">{bullet['text']}</span>
+            </div>
+            """, unsafe_allow_html=True)
 
     st.divider()
 
     # Topics
-    st.markdown("### 🏷️ Temas:")
-    st.markdown(" • ".join([f"**{t}**" for t in day_data["topics"]]))
+    st.markdown(f"### 🏷️ {t('topics')}:")
+    topics = summary.get("topics", day_data.get("topics", []))
+    topics_html = "".join([
+        f'<span class="topic-badge">{topic}</span>' for topic in topics
+    ])
+    st.markdown(
+        f'<div style="margin-top: 1rem;">{topics_html}</div>',
+        unsafe_allow_html=True
+    )
 
     # Metadata (for transparency and reproducibility)
     if "prompt_version" in day_data or "model" in day_data or "generated_at" in day_data:

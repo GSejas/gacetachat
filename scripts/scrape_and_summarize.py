@@ -146,53 +146,76 @@ def extract_text_from_pdf(pdf_bytes, max_pages=50):
 
 
 def summarize_with_gpt4(text, date):
-    """Use GPT-4o to create a 5-bullet summary with page references"""
-    print("🤖 Generating summary with GPT-4o...")
+    """Use GPT-4o to create bilingual (Spanish + English) 5-bullet summary with page references"""
+    print("🤖 Generating bilingual summary (ES + EN) with GPT-4o...")
 
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
     # Prompt version for tracking and reproducibility
-    PROMPT_VERSION = "2.0.0"  # Semver: major.minor.patch
+    PROMPT_VERSION = "3.0.0"  # Semver: major.minor.patch (3.0.0 = bilingual support)
 
-    prompt = f"""Eres un asistente experto en resumir documentos legales de Costa Rica.
+    prompt = f"""You are an expert at summarizing Costa Rican legal documents.
 
-A continuación está el texto de La Gaceta Oficial de Costa Rica del {date.strftime('%d de %B, %Y')}.
+Below is the text from La Gaceta Oficial de Costa Rica from {date.strftime('%B %d, %Y')}.
 
-El texto incluye marcadores de página en formato [PÁGINA N]. DEBES incluir estas referencias en tu resumen.
+The text includes page markers in the format [PÁGINA N]. You MUST include these page references in your summaries.
 
-Tu tarea:
-1. Lee el documento completo
-2. Identifica los 5 cambios, decisiones o anuncios más importantes
-3. Crea un resumen de 5 puntos en español claro y simple
-4. Cada punto debe tener un emoji relevante al inicio
-5. IMPORTANTE: Para cada punto, incluye las páginas donde aparece la información
-6. Identifica 3-5 temas principales (ej: Legal, Fiscal, Salud, Educación, Ambiente)
+Your task:
+1. Read the full document
+2. Identify the 5 most important changes, decisions, or announcements
+3. Create summaries in BOTH Spanish and English
+4. Each bullet point must have a relevant emoji at the start
+5. IMPORTANT: For each point, include the page numbers where the information appears
+6. Identify 3-5 main topics (e.g., Legal, Fiscal, Health, Education, Environment)
 
-Formato de respuesta (JSON):
+Response format (JSON):
 {{
-  "summary": "Breve resumen general en 1-2 oraciones",
-  "bullets": [
-    {{
-      "icon": "⚖️",
-      "text": "Descripción del cambio legal o decisión",
-      "pages": [1, 2]
-    }},
-    {{
-      "icon": "💰",
-      "text": "Descripción del cambio fiscal",
-      "pages": [5]
-    }},
-    ...
-  ],
-  "topics": ["Legal", "Fiscal", "Salud", ...]
+  "es": {{
+    "summary": "Breve resumen general en 1-2 oraciones en español",
+    "bullets": [
+      {{
+        "icon": "⚖️",
+        "text": "Descripción del cambio legal o decisión en español",
+        "pages": [1, 2]
+      }},
+      {{
+        "icon": "💰",
+        "text": "Descripción del cambio fiscal en español",
+        "pages": [5]
+      }},
+      ...
+    ],
+    "topics": ["Legal", "Fiscal", "Salud", ...]
+  }},
+  "en": {{
+    "summary": "Brief general summary in 1-2 sentences in English",
+    "bullets": [
+      {{
+        "icon": "⚖️",
+        "text": "Description of the legal change or decision in English",
+        "pages": [1, 2]
+      }},
+      {{
+        "icon": "💰",
+        "text": "Description of the fiscal change in English",
+        "pages": [5]
+      }},
+      ...
+    ],
+    "topics": ["Legal", "Fiscal", "Health", ...]
+  }}
 }}
 
-IMPORTANTE: El campo "pages" debe ser un array de números de página donde encontraste la información.
+IMPORTANT:
+- The "pages" field must be an array of page numbers where you found the information
+- Keep Spanish as the primary/authoritative version
+- English should be a faithful translation, preserving legal terminology
+- Both versions should have the same structure and content
 
-Texto de La Gaceta:
+La Gaceta text:
 {text[:15000]}
 
-Responde SOLO con el JSON, sin texto adicional."""
+Respond ONLY with the JSON, no additional text."""
 
     try:
         response = client.chat.completions.create(

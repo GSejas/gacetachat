@@ -19,7 +19,7 @@ env/
 # V1 Prototype (archived - don't commit to avoid bloat)
 # Note: Temporarily unignored for review
 # archive/v1/
-
+node_modules
 # Data & Logs
 gaceta_pdfs/
 demo_pdfs/
