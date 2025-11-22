@@ -244,7 +244,7 @@ Respond ONLY with the JSON, no additional text."""
 
         # Add metadata for transparency and reproducibility
         summary_data["prompt_version"] = PROMPT_VERSION
-        summary_data["model"] = "gpt-5-mini"
+        summary_data["model"] = "gpt-4o-mini"  # Match actual model used (line 222)
 
         # Track API usage for cost monitoring
         usage = response.usage
