@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
 GacetaChat Daily Scraper - Serverless Alpha
-Scrapes La Gaceta, summarizes with GPT-4o, saves to JSON
+Scrapes La Gaceta, analyzes FULL document with GPT-5-mini, saves to JSON
 
-Cost: ~$2-5 per day (OpenAI API)
+Cost: ~$0.04 per day (OpenAI GPT-5-mini API)
 Runtime: ~2-5 minutes per day
 """
 
@@ -19,6 +19,28 @@ from openai import OpenAI
 from bs4 import BeautifulSoup
 from pdf2image import convert_from_bytes
 from PIL import Image, ImageEnhance
+
+# AI Model Configuration (easy switching between providers/models)
+AI_CONFIG = {
+    "provider": "openai",  # Options: "openai", "gemini", "anthropic"
+    "model": "gpt-5-mini",  # GPT-5-mini: $0.25/1M input, $2.00/1M output
+    "temperature": 0.3,
+    "max_tokens": 2000,
+
+    # Pricing (for cost tracking)
+    "cost_per_1m_input": 0.25,
+    "cost_per_1m_output": 2.00,
+}
+
+# Alternative model configurations (uncomment to switch)
+# AI_CONFIG = {
+#     "provider": "gemini",
+#     "model": "gemini-2.0-flash-exp",
+#     "temperature": 0.3,
+#     "max_tokens": 2000,
+#     "cost_per_1m_input": 0.10,
+#     "cost_per_1m_output": 0.40,
+# }
 
 # Configuration
 DATA_DIR = Path(__file__).parent.parent / "data"
@@ -122,13 +144,13 @@ def create_header_image(pdf_bytes, date_str):
         return None
 
 
-def extract_text_from_pdf(pdf_bytes, max_pages=50):
-    """Extract text from PDF with page tracking (limit to first 50 pages to save costs)"""
-    print("📄 Extracting text from PDF...")
+def extract_text_from_pdf(pdf_bytes, max_pages=None):
+    """Extract text from PDF with page tracking (full document)"""
+    print("📄 Extracting text from PDF (FULL DOCUMENT)...")
     try:
         reader = pypdf.PdfReader(pdf_bytes)
         total_pages = len(reader.pages)
-        pages_to_read = min(max_pages, total_pages)
+        pages_to_read = total_pages if max_pages is None else min(max_pages, total_pages)
 
         # Extract text with page markers for reference
         text_with_pages = ""
@@ -145,27 +167,75 @@ def extract_text_from_pdf(pdf_bytes, max_pages=50):
         return None
 
 
-def summarize_with_gpt4(text, date):
-    """Use GPT-4o to create bilingual (Spanish + English) 5-bullet summary with page references"""
-    print("🤖 Generating bilingual summary (ES + EN) with GPT-4o...")
+def call_ai_model(prompt, system_message=None):
+    """
+    Provider-agnostic AI model caller.
+    Supports: OpenAI (GPT-5-mini, GPT-4o), Gemini, Anthropic
+    """
+    provider = AI_CONFIG["provider"]
+    model = AI_CONFIG["model"]
 
-    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    if provider == "openai":
+        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_message or "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=AI_CONFIG["temperature"],
+            max_completion_tokens=AI_CONFIG["max_tokens"]
+        )
+        return response.choices[0].message.content.strip(), response.usage
+
+    elif provider == "gemini":
+        import google.generativeai as genai
+        genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
+        gemini_model = genai.GenerativeModel(model)
+        response = gemini_model.generate_content(
+            f"{system_message}\n\n{prompt}" if system_message else prompt,
+            generation_config={
+                "temperature": AI_CONFIG["temperature"],
+                "max_output_tokens": AI_CONFIG["max_tokens"],
+            }
+        )
+        # Gemini usage tracking
+        usage = type('obj', (object,), {
+            'prompt_tokens': response.usage_metadata.prompt_token_count,
+            'completion_tokens': response.usage_metadata.candidates_token_count,
+            'total_tokens': response.usage_metadata.total_token_count
+        })()
+        return response.text, usage
+
+    else:
+        raise ValueError(f"Unsupported AI provider: {provider}")
+
+
+def summarize_with_ai(text, date):
+    """Analyze FULL document with bilingual (Spanish + English) 5-bullet summary using configured AI model"""
+    print(f"🤖 Generating bilingual summary (ES + EN) with {AI_CONFIG['model']} (FULL DOCUMENT)...")
 
     # Prompt version for tracking and reproducibility
-    PROMPT_VERSION = "3.0.0"  # Semver: major.minor.patch (3.0.0 = bilingual support)
+    PROMPT_VERSION = "4.0.0"  # 4.0.0 = Full document analysis (no truncation)
+
+    # Calculate document stats for monitoring
+    estimated_tokens = len(text) // 4
+    print(f"📊 Document size: {len(text):,} chars (~{estimated_tokens:,} tokens)")
 
     prompt = f"""You are an expert at summarizing Costa Rican legal documents.
 
-Below is the text from La Gaceta Oficial de Costa Rica from {date.strftime('%B %d, %Y')}.
+Below is the FULL text from La Gaceta Oficial de Costa Rica from {date.strftime('%B %d, %Y')}.
 
-The text includes page markers in the format [PÁGINA N]. You MUST include these page references in your summaries.
+The text includes page markers in the format [PÁGINA N]. You MUST include these page references.
+
+CRITICAL: Read the ENTIRE document (all {estimated_tokens:,} tokens). Do not focus only on the first few pages.
 
 Your task:
-1. Read the full document
-2. Identify the 5 most important changes, decisions, or announcements
+1. Read the FULL document (all pages)
+2. Identify the 5 most important changes, decisions, or announcements across ALL pages
 3. Create summaries in BOTH Spanish and English
 4. Each bullet point must have a relevant emoji at the start
-5. IMPORTANT: For each point, include the page numbers where the information appears
+5. IMPORTANT: For each point, include ACCURATE page numbers where the information appears
 6. Identify 3-5 main topics (e.g., Legal, Fiscal, Health, Education, Environment)
 
 Response format (JSON):
@@ -212,23 +282,15 @@ IMPORTANT:
 - English should be a faithful translation, preserving legal terminology
 - Both versions should have the same structure and content
 
-La Gaceta text:
-{text[:15000]}
+La Gaceta text (FULL DOCUMENT - ALL PAGES):
+{text}
 
 Respond ONLY with the JSON, no additional text."""
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Cost-effective option (~$0.15 per 1M input tokens)
-            messages=[
-                {"role": "system", "content": "Eres un experto en resumir documentos legales oficiales de Costa Rica."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.3,  # Lower temperature for more factual summaries
-            max_completion_tokens=1000  # Updated API parameter name
-        )
-
-        result = response.choices[0].message.content.strip()
+        # Call AI model (provider-agnostic)
+        system_message = "Eres un experto en resumir documentos legales oficiales de Costa Rica."
+        result, usage = call_ai_model(prompt, system_message)
 
         # Clean markdown code blocks if present
         if result.startswith("```json"):
@@ -244,12 +306,12 @@ Respond ONLY with the JSON, no additional text."""
 
         # Add metadata for transparency and reproducibility
         summary_data["prompt_version"] = PROMPT_VERSION
-        summary_data["model"] = "gpt-4o-mini"  # Match actual model used (line 222)
+        summary_data["model"] = AI_CONFIG["model"]
+        summary_data["provider"] = AI_CONFIG["provider"]
 
         # Track API usage for cost monitoring
-        usage = response.usage
-        cost_input = (usage.prompt_tokens / 1_000_000) * 0.25  # $0.25 per 1M input tokens
-        cost_output = (usage.completion_tokens / 1_000_000) * 2.00  # $2.00 per 1M output tokens
+        cost_input = (usage.prompt_tokens / 1_000_000) * AI_CONFIG["cost_per_1m_input"]
+        cost_output = (usage.completion_tokens / 1_000_000) * AI_CONFIG["cost_per_1m_output"]
         summary_data["api_cost_usd"] = round(cost_input + cost_output, 4)
         summary_data["tokens"] = {
             "input": usage.prompt_tokens,
@@ -257,8 +319,10 @@ Respond ONLY with the JSON, no additional text."""
             "total": usage.total_tokens
         }
 
-        print(f"✅ Summary generated: {len(summary_data['bullets'])} bullets (prompt v{PROMPT_VERSION})")
-        print(f"💰 Cost: ${summary_data['api_cost_usd']:.4f} | Tokens: {usage.total_tokens}")
+        print(f"✅ Summary generated (prompt v{PROMPT_VERSION})")
+        print(f"   ES bullets: {len(summary_data['es']['bullets'])}")
+        print(f"   EN bullets: {len(summary_data['en']['bullets'])}")
+        print(f"💰 Cost: ${summary_data['api_cost_usd']:.4f} | Tokens: {usage.total_tokens:,}")
         return summary_data
 
     except Exception as e:
@@ -350,7 +414,8 @@ def main():
                 text = extract_text_from_pdf(pdf_bytes)
 
                 if text and len(text) >= 1000:
-                    summary_data = summarize_with_gpt4(text, datetime.strptime(date_str, "%Y-%m-%d"))
+                    gazette_date = datetime.strptime(date_str, "%Y-%m-%d")
+                    summary_data = summarize_with_ai(text, gazette_date)
                     if summary_data:
                         summary_data["date"] = date_str
                         summary_data["pdf_url"] = url
@@ -402,7 +467,7 @@ def main():
             continue
 
         # Generate summary
-        summary_data = summarize_with_gpt4(text, date)
+        summary_data = summarize_with_ai(text, date)
         if summary_data is None:
             print(f"❌ Failed to generate summary for {date_str}")
             continue
